@@ -1,6 +1,6 @@
 import { chain } from "."
 
-function typeGuard(a: number | string): a is number {
+function isNumber(a: number | string): a is number {
     return typeof a === "number";
 }
 
@@ -40,6 +40,7 @@ describe("chain", () => {
             })
         })
         it("map", () => {
+
             const actual = chain.map([1, 2, 3, 4], x => x + 50).array;
             expect(actual).toEqual([51, 52, 53, 54]);
         });
@@ -49,20 +50,43 @@ describe("chain", () => {
                 expect(actual).toEqual([2, 4])
             })
             it("array - type guard", () => {
-                const actual = chain.filter([1, "2", 3, "4"], typeGuard).array;
+                const actual = chain.filter([1, "2", 3, "4"], isNumber).array;
                 const first: number = actual[0] //type check
                 expect(actual).toEqual([1, 3]);
             })
         })
     })
-    describe("chain", () => {
-        it("1", () => {
-            const actual = chain([1, 2, 3, 4]).map(x => x + 50).array;
-            expect(actual).toEqual([51, 52, 53, 54])
-        });
-        it("2", () => {
-            const actual = chain(["1", "2"]).map(x => parseInt(x)).array;
-            expect(actual).toEqual([1, 2]);
+    describe("chin iterable", () => {
+        describe("map and filter", () => {
+            it("only map", () => {
+                const actual = chain([1, 2, 3, 4]).map(x => x + 50).array;
+                expect(actual).toEqual([51, 52, 53, 54])
+            });
+            it("only filter", () => {
+                const actual = chain(["1", "2"]).map(x => parseInt(x)).array;
+                expect(actual).toEqual([1, 2]);
+            });
+            it("map after filter", () => {
+                const actual = chain([1, 2, 3, 4, 5])
+                    .filter(x => x % 2 == 0)
+                    .map(x => x * 2)
+                    .array;
+                expect(actual).toEqual([4, 8]);
+            });
+            it("filter after map", () => {
+                const actual = chain([1, 2, 3, 4, 5])
+                    .map(x => x.toString())
+                    .filter(x => x !== "1")
+                    .array;
+                expect(actual).toEqual(["2", "3", "4", "5"]);
+            });
+            it("map after filter with type guard", () => {
+                const actual = chain(["2", 3, "4", "5"])
+                    .filter(isNumber)
+                    .map(x => x + 3)
+                    .array;
+                expect(actual).toEqual([6])
+            });
         })
     })
 })
