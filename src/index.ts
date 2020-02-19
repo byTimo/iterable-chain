@@ -12,6 +12,8 @@ export const chain = (function () {
         return new ChainIterable(mapGenerator(source, selector));
     };
     create.filter = filter;
+    create.some = some;
+    create.every = every;
     return create;
 })()
 
@@ -22,12 +24,16 @@ interface FilterOverride<T> {
     (condition: (item: T, index: number) => boolean): ChainIterable<T>
 }
 
-class ChainIterable<T> {
+export class ChainIterable<T> implements Iterable<T> {
     constructor(private readonly source: Iterable<T>) {
     }
 
-    get iterable() {
-        return this.source;
+    [Symbol.iterator](): Iterator<T, any, undefined> {
+        return this.source[Symbol.iterator]();
+    }
+
+    get array(): T[] {
+        return Array.from(this.source);
     }
 
     map = <R>(selector: (item: T, index: number) => R): ChainIterable<R> => {
@@ -38,8 +44,12 @@ class ChainIterable<T> {
         return chain.filter(this.source, condition);
     }
 
-    get array(): T[] {
-        return Array.from(this.source);
+    some = (condition?: (item: T, index: number) => boolean): boolean => {
+        return chain.some(this.source, condition);
+    }
+
+    every = (condition?: (item: T, index: number) => boolean): boolean => {
+        return chain.every(this.source, condition);
     }
 }
 
@@ -76,4 +86,26 @@ function* filterGenerator<T>(source: Iterable<T>, condition: (item: T, index: nu
             yield item;
         }
     }
+}
+
+function some<T>(source: Iterable<T>, condition?: (item: T, index: number) => boolean): boolean {
+    let i = 0;
+    condition = condition || (x => !!x);
+    for (const item of source) {
+        if (condition(item, i)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+function every<T>(source: Iterable<T>, condition?: (item: T, index: number) => boolean): boolean {
+    let i = 0;
+    condition = condition || (x => !!x);
+    for (const item of source) {
+        if (!condition(item, i)) {
+            return false;
+        }
+    }
+    return true;
 }

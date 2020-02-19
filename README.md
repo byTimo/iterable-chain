@@ -2,7 +2,7 @@
 
 * ✅ map, filter (Select, Where)
 * ✅ range, repeat (Range, Repeat)
-* ❌ some, every (Any, All)
+* ✅ some, every (Any, All)
 * ❌ reduce (Aggregate)
 * ❌ flatMap (SelectMany)
 * ❌ append, prepand (Append, Prepand)

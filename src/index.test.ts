@@ -1,4 +1,4 @@
-import { chain } from "."
+import { chain, ChainIterable } from "."
 
 function isNumber(a: number | string): a is number {
     return typeof a === "number";
@@ -40,7 +40,6 @@ describe("chain", () => {
             })
         })
         it("map", () => {
-
             const actual = chain.map([1, 2, 3, 4], x => x + 50).array;
             expect(actual).toEqual([51, 52, 53, 54]);
         });
@@ -54,9 +53,45 @@ describe("chain", () => {
                 const first: number = actual[0] //type check
                 expect(actual).toEqual([1, 3]);
             })
-        })
+        });
+        describe("some", () => {
+            it("without condition", () => {
+                const falsyActual = chain.some([undefined, false, "", 0, null]);
+                const truthyActual = chain.some([undefined, false, "", 0, null, 1]);
+                expect(falsyActual).toBeFalsy();
+                expect(truthyActual).toBeTruthy();
+            });
+            it("with condition", () => {
+                const actual = chain.some([1, 2, 3, 4], x => x === 3);
+                expect(actual).toBeTruthy();
+            });
+        });
+        describe("every", () => {
+            it("without condition", () => {
+                const truthyActual = chain.every([1, 2, 3, 4, 5]);
+                const falsyActual = chain.every([undefined, false, "", 0, null, 1]);
+                expect(truthyActual).toBeTruthy();
+                expect(falsyActual).toBeFalsy();
+            });
+            it("with condition", () => {
+                const actual = chain.every([1, 2, 3, 4], x => x === 3);
+                expect(actual).toBeFalsy();
+            });
+        });
     })
-    describe("chin iterable", () => {
+    describe("chain iterable", () => {
+        describe("can use as Iterable", () => {
+            it("from constuctor", () => {
+                const iterable = new ChainIterable([1, 2, 3, 4, 5]);
+                const actual = chain.filter(iterable, x => x === 5)
+                expect(actual[Symbol.iterator]().next().value).toEqual(5);
+            });
+            it("from chain", () => {
+                const iterable = chain([1, 2, 3, 4, 5]);
+                const actual = chain.filter(iterable, x => x === 5)
+                expect(actual[Symbol.iterator]().next().value).toEqual(5);
+            });
+        });
         describe("map and filter", () => {
             it("only map", () => {
                 const actual = chain([1, 2, 3, 4]).map(x => x + 50).array;
