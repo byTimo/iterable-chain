@@ -95,7 +95,67 @@ describe("chain", () => {
                 const actual = chain.concat([1, 2, 3], ["4", "5", "6"]).array;
                 expect(actual).toEqual([1, 2, 3, "4", "5", "6"]);
             })
-        })
+        });
+        describe("count", () => {
+            it("without condition", () => {
+                const actual = chain.count([1, 2, 3, 4, 5, 6]);
+                expect(actual).toBe(6);
+            });
+            it("with condition", () => {
+                const actual = chain.count([1, 2, 3, 4, 5, 6], x => x % 2 === 0);
+                expect(actual).toBe(3);
+            });
+        });
+        describe("contains", () => {
+            const obj = { a: 10, b: 20 };
+            const iterable = [obj, { ...obj }, { a: 15, b: 30 }];
+            it("without comparer", () => {
+                expect(chain.contains(iterable, obj)).toBe(true);
+                expect(chain.contains(iterable, { a: 10, b: 20 })).toBe(false);
+            });
+            it("with comparer", () => {
+                const actual = chain.contains(iterable, { a: 10, b: 20 }, (a, b) => a.a === b.a && a.b === b.b)
+                expect(actual).toBe(true);
+            });
+        });
+        describe("first", () => {
+            it("empty collection", () => {
+                expect(() => {
+                    chain.first([]);
+                }).toThrow();
+            })
+            it("without condition", () => {
+                const actual = chain.first([1, 2, 3]);
+                expect(actual).toBe(1);
+            })
+            it("with condition, but not found", () => {
+                expect(() => {
+                    chain.first([1, 2, 3], x => x === 4);
+                }).toThrow();
+            })
+            it("with condition", () => {
+                const actual = chain.first([1, 2, 3], x => x === 2);
+                expect(actual).toBe(2)
+            })
+        });
+        describe("firstOrDefault", () => {
+            it("empty collection", () => {
+                const actual = chain.firstOrDefault([], -1);
+                expect(actual).toBe(-1);
+            })
+            it("without condition", () => {
+                const actual = chain.firstOrDefault([1, 2, 3], -1);
+                expect(actual).toBe(1);
+            })
+            it("with condition, but not found", () => {
+                const actual = chain.firstOrDefault([1, 2, 3], -1, x => x === 4);
+                expect(actual).toBe(-1)
+            })
+            it("with condition", () => {
+                const actual = chain.firstOrDefault([1, 2, 3], -1, x => x === 2);
+                expect(actual).toBe(2)
+            })
+        });
     })
     describe("chain iterable", () => {
         describe("can use as Iterable", () => {

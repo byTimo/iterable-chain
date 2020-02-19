@@ -6,10 +6,10 @@
 * ❌ reduce (Aggregate)
 * ❌ flatMap (SelectMany)
 * ✅ append, prepand (Append, Prepand)
-* ❌ first, firstOrDefault (First, FirstOrDefault)
+* ✅ first, firstOrDefault (First, FirstOrDefault)
 * ❌ single, singleOrDefault (Single, SingelOrDefault)
 * ❌ last, lastOrDefault (Last, LastOrDefault)
-* ❌ count, contains (Count, Contains)
+* ✅ count, contains (Count, Contains)
 * ❌ distinct (Distinct)
 * ❌ ? empty (Empty) or unit
 * ❌ skip, take (Skip, Take)

@@ -1,3 +1,5 @@
+const key = Symbol("chain_key");
+
 export const chain = (function () {
     const create = function <T>(source: Iterable<T>) {
         return new ChainIterable(source);
@@ -23,6 +25,10 @@ export const chain = (function () {
     create.concat = function <T, S>(source: Iterable<T>, other: Iterable<S>) {
         return new ChainIterable(concatGenerator(source, other));
     }
+    create.count = count;
+    create.contains = contains;
+    create.first = first;
+    create.firstOrDefault = firstOrDefault;
     return create;
 })()
 
@@ -71,6 +77,22 @@ export class ChainIterable<T> implements Iterable<T> {
 
     concat = <S>(other: Iterable<S>): ChainIterable<T | S> => {
         return chain.concat(this.source, other);
+    }
+
+    count = (condition?: (item: T, index: number) => boolean): number => {
+        return chain.count(this.source, condition);
+    }
+
+    contains = (element: T, comparer?: (a: T, b: T) => boolean): boolean => {
+        return chain.contains(this.source, element, comparer);
+    }
+
+    first = (condition?: (item: T, index: number) => boolean): T => {
+        return chain.first(this.source, condition);
+    }
+
+    firstOreDefault = (defaultValue: T, condition?: (item: T, index: number) => boolean): T => {
+        return chain.firstOrDefault(this.source, defaultValue, condition);
     }
 }
 
@@ -152,4 +174,46 @@ function* concatGenerator<T, S>(source: Iterable<T>, other: Iterable<S>) {
     for (const otherItem of other) {
         yield otherItem;
     }
+}
+
+function count<T>(source: Iterable<T>, condition?: (item: T, index: number) => boolean): number {
+    let i = 0;
+    let result = 0;
+    condition = condition || (x => true);
+    for (const item of source) {
+        if (condition(item, i)) {
+            result++;
+        }
+        i++;
+    }
+    return result;
+}
+
+function contains<T>(source: Iterable<T>, element: T, comparer?: (a: T, b: T) => boolean): boolean {
+    comparer = comparer || ((a, b) => a === b);
+    for (const item of source) {
+        if (comparer(item, element)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+function firstOrDefault<T>(source: Iterable<T>, defaultValue: T, condition?: (item: T, index: number) => boolean): T {
+    condition = condition || (() => true);
+    let i = 0;
+    for (const item of source) {
+        if (condition(item, i)) {
+            return item;
+        }
+    }
+    return defaultValue;
+}
+
+function first<T>(source: Iterable<T>, condition?: (item: T, index: number) => boolean): T {
+    const result = firstOrDefault(source, { [key]: true } as any, condition);
+    if ((result as any)[key]) {
+        throw new Error("Collection doesn't contains elements");
+    }
+    return result;
 }
