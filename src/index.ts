@@ -5,15 +5,24 @@ export const chain = (function () {
     create.range = function (start: number, count: number) {
         return new ChainIterable(rangeGenerator(start, count));
     };
-    create.repate = function repeat<T>(value: T, count: number) {
+    create.repate = function <T>(value: T, count: number) {
         return new ChainIterable(repeatGenerator(value, count));
     };
-    create.map = function map<T, R>(source: Iterable<T>, selector: (item: T, index: number) => R) {
+    create.map = function <T, R>(source: Iterable<T>, selector: (item: T, index: number) => R) {
         return new ChainIterable(mapGenerator(source, selector));
     };
     create.filter = filter;
     create.some = some;
     create.every = every;
+    create.append = function <T>(source: Iterable<T>, element: T) {
+        return new ChainIterable(appendGenerator(source, element));
+    }
+    create.prepend = function <T>(source: Iterable<T>, element: T) {
+        return new ChainIterable(prependGenerator(source, element));
+    }
+    create.concat = function <T, S>(source: Iterable<T>, other: Iterable<S>) {
+        return new ChainIterable(concatGenerator(source, other));
+    }
     return create;
 })()
 
@@ -50,6 +59,18 @@ export class ChainIterable<T> implements Iterable<T> {
 
     every = (condition?: (item: T, index: number) => boolean): boolean => {
         return chain.every(this.source, condition);
+    }
+
+    append = (element: T): ChainIterable<T> => {
+        return chain.append(this.source, element);
+    }
+
+    prepend = (element: T): ChainIterable<T> => {
+        return chain.prepend(this.source, element);
+    }
+
+    concat = <S>(other: Iterable<S>): ChainIterable<T | S> => {
+        return chain.concat(this.source, other);
     }
 }
 
@@ -108,4 +129,27 @@ function every<T>(source: Iterable<T>, condition?: (item: T, index: number) => b
         }
     }
     return true;
+}
+
+function* appendGenerator<T>(source: Iterable<T>, element: T) {
+    yield element;
+    for (const item of source) {
+        yield item;
+    }
+}
+
+function* prependGenerator<T>(source: Iterable<T>, element: T) {
+    for (const item of source) {
+        yield item;
+    }
+    yield element;
+}
+
+function* concatGenerator<T, S>(source: Iterable<T>, other: Iterable<S>) {
+    for (const sourceItem of source) {
+        yield sourceItem;
+    }
+    for (const otherItem of other) {
+        yield otherItem;
+    }
 }

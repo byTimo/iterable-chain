@@ -78,6 +78,24 @@ describe("chain", () => {
                 expect(actual).toBeFalsy();
             });
         });
+        describe("append, prepend, concat", () => {
+            it("append", () => {
+                const actual = chain.append([1, 2, 3, 4, 5], 15).array;
+                expect(actual).toEqual([15, 1, 2, 3, 4, 5]);
+            });
+            it("prepend", () => {
+                const actual = chain.prepend([1, 2, 3, 4, 5], 15).array;
+                expect(actual).toEqual([1, 2, 3, 4, 5, 15]);
+            });
+            it("concat same type", () => {
+                const actual = chain.concat([1, 2, 3], [4, 5, 6]).array;
+                expect(actual).toEqual([1, 2, 3, 4, 5, 6]);
+            });
+            it("concat different types", () => {
+                const actual = chain.concat([1, 2, 3], ["4", "5", "6"]).array;
+                expect(actual).toEqual([1, 2, 3, "4", "5", "6"]);
+            })
+        })
     })
     describe("chain iterable", () => {
         describe("can use as Iterable", () => {
