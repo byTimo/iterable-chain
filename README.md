@@ -7,8 +7,8 @@
 * ❌ flatMap (SelectMany)
 * ✅ append, prepand (Append, Prepand)
 * ✅ first, firstOrDefault (First, FirstOrDefault)
-* ❌ single, singleOrDefault (Single, SingelOrDefault)
-* ❌ last, lastOrDefault (Last, LastOrDefault)
+* ✅ single, singleOrDefault (Single, SingelOrDefault)
+* ✅ last, lastOrDefault (Last, LastOrDefault)
 * ✅ count, contains (Count, Contains)
 * ❌ distinct (Distinct)
 * ❌ ? empty (Empty) or unit

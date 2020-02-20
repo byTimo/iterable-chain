@@ -1,4 +1,5 @@
 const key = Symbol("chain_key");
+const marker: any = { [key]: true };
 
 export const chain = (function () {
     const create = function <T>(source: Iterable<T>) {
@@ -29,6 +30,10 @@ export const chain = (function () {
     create.contains = contains;
     create.first = first;
     create.firstOrDefault = firstOrDefault;
+    create.single = single;
+    create.singleOrDefault = singleOrDefault;
+    create.last = last;
+    create.lastOrDefault = lastOrDefault;
     return create;
 })()
 
@@ -93,6 +98,22 @@ export class ChainIterable<T> implements Iterable<T> {
 
     firstOreDefault = (defaultValue: T, condition?: (item: T, index: number) => boolean): T => {
         return chain.firstOrDefault(this.source, defaultValue, condition);
+    }
+
+    single = (condition?: (item: T, index: number) => boolean): T => {
+        return chain.single(this.source, condition);
+    }
+
+    singleOrDefault = (defaultValue: T, condition?: (item: T, index: number) => boolean): T => {
+        return chain.singleOrDefault(this.source, defaultValue, condition);
+    }
+
+    last = (condition?: (item: T, index: number) => boolean): T => {
+        return chain.last(this.source, condition);
+    }
+
+    lastOrDefault = (defaultValue: T, condition?: (item: T, index: number) => boolean): T => {
+        return chain.lastOrDefault(this.source, defaultValue, condition);
     }
 }
 
@@ -211,9 +232,60 @@ function firstOrDefault<T>(source: Iterable<T>, defaultValue: T, condition?: (it
 }
 
 function first<T>(source: Iterable<T>, condition?: (item: T, index: number) => boolean): T {
-    const result = firstOrDefault(source, { [key]: true } as any, condition);
-    if ((result as any)[key]) {
+    const result = firstOrDefault(source, marker as any, condition);
+    if (result === marker) {
         throw new Error("Collection doesn't contains elements");
+    }
+    return result;
+}
+
+function singleOrDefault<T>(source: Iterable<T>, defaultValue: T, condition?: (item: T, index: number) => boolean): T {
+    condition = condition || (() => true);
+    let counter = 0, index = 0;
+    let result: T;
+    for (const item of source) {
+        if (condition(item, index)) {
+            result = item;
+            if (++counter > 1) {
+                break;
+            }
+        }
+        index++;
+    }
+
+    if (counter === 0) {
+        return defaultValue;
+    }
+    if (counter === 1) {
+        return result!;
+    }
+    throw new Error("TODO");
+}
+
+function single<T>(source: Iterable<T>, condition?: (item: T, index: number) => boolean): T {
+    const result = singleOrDefault(source, marker, condition);
+    if (result === marker) {
+        throw new Error("TODO");
+    }
+    return result;
+}
+
+function lastOrDefault<T>(source: Iterable<T>, defaultValue: T, condition?: (item: T, index: number) => boolean): T {
+    condition = condition || (() => true);
+    let result = defaultValue, i = 0;
+    for (const item of source) {
+        if (condition(item, i)) {
+            result = item;
+        }
+        i++;
+    }
+    return result;
+}
+
+function last<T>(source: Iterable<T>, condition?: (item: T, index: number) => boolean): T {
+    const result = lastOrDefault(source, marker, condition);
+    if (result === marker) {
+        throw new Error("TODO");
     }
     return result;
 }

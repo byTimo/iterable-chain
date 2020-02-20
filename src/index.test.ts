@@ -1,4 +1,5 @@
 import { chain, ChainIterable } from "."
+import { exec } from "child_process";
 
 function isNumber(a: number | string): a is number {
     return typeof a === "number";
@@ -147,7 +148,7 @@ describe("chain", () => {
                 const actual = chain.firstOrDefault([1, 2, 3], -1);
                 expect(actual).toBe(1);
             })
-            it("with condition, but not found", () => {
+            it("with condition - not found", () => {
                 const actual = chain.firstOrDefault([1, 2, 3], -1, x => x === 4);
                 expect(actual).toBe(-1)
             })
@@ -155,6 +156,102 @@ describe("chain", () => {
                 const actual = chain.firstOrDefault([1, 2, 3], -1, x => x === 2);
                 expect(actual).toBe(2)
             })
+        });
+        describe("single", () => {
+            it("empty collection", () => {
+                expect(() => {
+                    chain.single([]);
+                }).toThrow()
+            });
+            it("one element in collection", () => {
+                const actual = chain.single([1]);
+                expect(actual).toBe(1);
+            });
+            it("two elements in collection", () => {
+                expect(() => {
+                    chain.single([1, 2]);
+                }).toThrow();
+            });
+            it("with condition - not found", () => {
+                expect(() => {
+                    chain.single([1, 2, 3], x => x === 4);
+                }).toThrow();
+            });
+            it("with condition - more then one", () => {
+                expect(() => {
+                    chain.single([1, 2, 3], x => x % 2 === 1);
+                }).toThrow();
+            });
+            it("with condition", () => {
+                const actual = chain.single([1, 2, 3], x => x === 2);
+                expect(actual).toBe(2);
+            });
+        });
+        describe("singleOrDefault", () => {
+            it("empty collection", () => {
+                const actual = chain.singleOrDefault([], "default");
+                expect(actual).toBe("default");
+            });
+            it("one element in collection", () => {
+                const actual = chain.singleOrDefault([1], -1);
+                expect(actual).toBe(1);
+            });
+            it("two elements in collection", () => {
+                expect(() => {
+                    chain.singleOrDefault([1, 2], -1);
+                }).toThrow();
+            });
+            it("with condition - not found", () => {
+                const actual = chain.singleOrDefault([1, 2, 3], -1, x => x === 4);
+                expect(actual).toBe(-1);
+            });
+            it("with condition - more then one", () => {
+                expect(() => {
+                    chain.singleOrDefault([1, 2, 3], -1, x => x % 2 === 1);
+                }).toThrow();
+            });
+            it("with condition", () => {
+                const actual = chain.singleOrDefault([1, 2, 3], -1, x => x === 2);
+                expect(actual).toBe(2);
+            });
+        });
+        describe("last", () => {
+            it("empty collection", () => {
+                expect(() => {
+                    chain.last([]);
+                }).toThrow();
+            });
+            it("without condition", () => {
+                const actual = chain.last([1, 2, 3]);
+                expect(actual).toBe(3);
+            });
+            it("with condition - not found", () => {
+                expect(() => {
+                    chain.last([1, 2, 3], x => x === 4);
+                }).toThrow();
+            });
+            it("with condition", () => {
+                const actual = chain.last([1, 2, 3], x => x % 2 === 1)
+                expect(actual).toBe(3);
+            });
+        });
+        describe("lastOrDefault", () => {
+            it("empty collection", () => {
+                const actual = chain.lastOrDefault([], "default");
+                expect(actual).toBe("default");
+            });
+            it("without condition", () => {
+                const actual = chain.lastOrDefault([1, 2, 3], -1);
+                expect(actual).toBe(3);
+            });
+            it("with condition - not found", () => {
+                const actual = chain.lastOrDefault([1, 2, 3], -1, x => x === 4);
+                expect(actual).toBe(-1);
+            });
+            it("with condition", () => {
+                const actual = chain.lastOrDefault([1, 2, 3], -1, x => x % 2 === 1)
+                expect(actual).toBe(3);
+            });
         });
     })
     describe("chain iterable", () => {
