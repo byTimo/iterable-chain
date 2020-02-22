@@ -235,6 +235,34 @@ describe("chain", () => {
                 expect(actual).toBe(3);
             });
         });
+        describe("skip", () => {
+            it("empty collection, count is greater of zero", () => {
+                const actual = chain.skip([], 50).array;
+                expect(actual).toEqual([]);
+            });
+            it("not empty collection, count is zero", () => {
+                const actual = chain.skip([1, 2, 3], 0).array;
+                expect(actual).toEqual([1, 2, 3]);
+            });
+            it("skip 3 items", () => {
+                const actual = chain.skip([1, 2, 3, 4], 3).array;
+                expect(actual).toEqual([4]);
+            })
+        })
+        describe("take", () => {
+            it("empty collection, count is greater of zero", () => {
+                const actual = chain.take([], 50).array;
+                expect(actual).toEqual([]);
+            });
+            it("not empty collection, count is zero", () => {
+                const actual = chain.take([1, 2, 3], 0).array;
+                expect(actual).toEqual([]);
+            });
+            it("take 3 items", () => {
+                const actual = chain.take([1, 2, 3, 4], 3).array;
+                expect(actual).toEqual([1, 2, 3]);
+            })
+        })
         describe("lastOrDefault", () => {
             it("empty collection", () => {
                 const actual = chain.lastOrDefault([], "default");

@@ -15,8 +15,6 @@ export const chain = (function () {
         return new ChainIterable(mapGenerator(source, selector));
     };
     create.filter = filter;
-    create.some = some;
-    create.every = every;
     create.append = function <T>(source: Iterable<T>, element: T) {
         return new ChainIterable(appendGenerator(source, element));
     }
@@ -26,6 +24,14 @@ export const chain = (function () {
     create.concat = function <T, S>(source: Iterable<T>, other: Iterable<S>) {
         return new ChainIterable(concatGenerator(source, other));
     }
+    create.skip = function <T>(source: Iterable<T>, count: number): ChainIterable<T> {
+        return new ChainIterable(skipGenerator(source, count));
+    }
+    create.take = function <T>(source: Iterable<T>, count: number): ChainIterable<T> {
+        return new ChainIterable(takeGenerator(source, count));
+    }
+    create.some = some;
+    create.every = every;
     create.count = count;
     create.contains = contains;
     create.first = first;
@@ -115,6 +121,14 @@ export class ChainIterable<T> implements Iterable<T> {
     lastOrDefault = (defaultValue: T, condition?: (item: T, index: number) => boolean): T => {
         return chain.lastOrDefault(this.source, defaultValue, condition);
     }
+
+    skip = (count: number): ChainIterable<T> => {
+        return chain.skip(this.source, count);
+    }
+
+    take = (count: number): ChainIterable<T> => {
+        return chain.take(this.source, count);
+    }
 }
 
 function* rangeGenerator(start: number, count: number) {
@@ -194,6 +208,29 @@ function* concatGenerator<T, S>(source: Iterable<T>, other: Iterable<S>) {
     }
     for (const otherItem of other) {
         yield otherItem;
+    }
+}
+
+function* skipGenerator<T>(source: Iterable<T>, count: number) {
+    const iterator = source[Symbol.iterator]();
+    let result = iterator.next();
+    while (!result.done && count > 0) {
+        count--;
+        result = iterator.next();
+    }
+    while (!result.done) {
+        yield result.value;
+        result = iterator.next();
+    }
+}
+
+function* takeGenerator<T>(source: Iterable<T>, count: number) {
+    const iterator = source[Symbol.iterator]();
+    let result = iterator.next();
+    while (!result.done && count > 0) {
+        yield result.value;
+        count--;
+        result = iterator.next();
     }
 }
 
