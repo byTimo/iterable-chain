@@ -1,13 +1,12 @@
-import { chain, ChainIterable } from "."
-import { exec } from "child_process";
+import { chain } from "../src";
 
 function isNumber(a: number | string): a is number {
     return typeof a === "number";
 }
 
-describe("chain", () => {
-    describe("chain global", () => {
-        //TODO (byTimo) Set, Map, Record
+//TODO (byTimo) Set, Map, Record
+describe("chain global", () => {
+    describe("generators", () => {
         describe("range", () => {
             it("start from zero", () => {
                 const actual = chain.range(0, 5).array;
@@ -55,29 +54,17 @@ describe("chain", () => {
                 expect(actual).toEqual([1, 3]);
             })
         });
-        describe("some", () => {
-            it("without condition", () => {
-                const falsyActual = chain.some([undefined, false, "", 0, null]);
-                const truthyActual = chain.some([undefined, false, "", 0, null, 1]);
-                expect(falsyActual).toBeFalsy();
-                expect(truthyActual).toBeTruthy();
-            });
-            it("with condition", () => {
-                const actual = chain.some([1, 2, 3, 4], x => x === 3);
-                expect(actual).toBeTruthy();
-            });
+    })
+    describe("some", () => {
+        it("without condition", () => {
+            const falsyActual = chain.some([undefined, false, "", 0, null]);
+            const truthyActual = chain.some([undefined, false, "", 0, null, 1]);
+            expect(falsyActual).toBeFalsy();
+            expect(truthyActual).toBeTruthy();
         });
-        describe("every", () => {
-            it("without condition", () => {
-                const truthyActual = chain.every([1, 2, 3, 4, 5]);
-                const falsyActual = chain.every([undefined, false, "", 0, null, 1]);
-                expect(truthyActual).toBeTruthy();
-                expect(falsyActual).toBeFalsy();
-            });
-            it("with condition", () => {
-                const actual = chain.every([1, 2, 3, 4], x => x === 3);
-                expect(actual).toBeFalsy();
-            });
+        it("with condition", () => {
+            const actual = chain.some([1, 2, 3, 4], x => x === 3);
+            expect(actual).toBeTruthy();
         });
         describe("append, prepend, concat", () => {
             it("append", () => {
@@ -96,6 +83,55 @@ describe("chain", () => {
                 const actual = chain.concat([1, 2, 3], ["4", "5", "6"]).array;
                 expect(actual).toEqual([1, 2, 3, "4", "5", "6"]);
             })
+        });
+        describe("skip", () => {
+            it("empty collection, count is greater of zero", () => {
+                const actual = chain.skip([], 50).array;
+                expect(actual).toEqual([]);
+            });
+            it("not empty collection, count is zero", () => {
+                const actual = chain.skip([1, 2, 3], 0).array;
+                expect(actual).toEqual([1, 2, 3]);
+            });
+            it("skip 3 items", () => {
+                const actual = chain.skip([1, 2, 3, 4], 3).array;
+                expect(actual).toEqual([4]);
+            })
+        })
+        describe("take", () => {
+            it("empty collection, count is greater of zero", () => {
+                const actual = chain.take([], 50).array;
+                expect(actual).toEqual([]);
+            });
+            it("not empty collection, count is zero", () => {
+                const actual = chain.take([1, 2, 3], 0).array;
+                expect(actual).toEqual([]);
+            });
+            it("take 3 items", () => {
+                const actual = chain.take([1, 2, 3, 4], 3).array;
+                expect(actual).toEqual([1, 2, 3]);
+            })
+        })
+        describe("reverse", () => {
+            it("reverse", () => {
+                const actual = chain.reverse([1, 2, 3, 4]).array;
+                expect(actual).toEqual([4, 3, 2, 1]);
+            })
+        })
+    });
+
+    describe("functions", () => {
+        describe("every", () => {
+            it("without condition", () => {
+                const truthyActual = chain.every([1, 2, 3, 4, 5]);
+                const falsyActual = chain.every([undefined, false, "", 0, null, 1]);
+                expect(truthyActual).toBeTruthy();
+                expect(falsyActual).toBeFalsy();
+            });
+            it("with condition", () => {
+                const actual = chain.every([1, 2, 3, 4], x => x === 3);
+                expect(actual).toBeFalsy();
+            });
         });
         describe("count", () => {
             it("without condition", () => {
@@ -235,34 +271,6 @@ describe("chain", () => {
                 expect(actual).toBe(3);
             });
         });
-        describe("skip", () => {
-            it("empty collection, count is greater of zero", () => {
-                const actual = chain.skip([], 50).array;
-                expect(actual).toEqual([]);
-            });
-            it("not empty collection, count is zero", () => {
-                const actual = chain.skip([1, 2, 3], 0).array;
-                expect(actual).toEqual([1, 2, 3]);
-            });
-            it("skip 3 items", () => {
-                const actual = chain.skip([1, 2, 3, 4], 3).array;
-                expect(actual).toEqual([4]);
-            })
-        })
-        describe("take", () => {
-            it("empty collection, count is greater of zero", () => {
-                const actual = chain.take([], 50).array;
-                expect(actual).toEqual([]);
-            });
-            it("not empty collection, count is zero", () => {
-                const actual = chain.take([1, 2, 3], 0).array;
-                expect(actual).toEqual([]);
-            });
-            it("take 3 items", () => {
-                const actual = chain.take([1, 2, 3, 4], 3).array;
-                expect(actual).toEqual([1, 2, 3]);
-            })
-        })
         describe("lastOrDefault", () => {
             it("empty collection", () => {
                 const actual = chain.lastOrDefault([], "default");
@@ -281,56 +289,5 @@ describe("chain", () => {
                 expect(actual).toBe(3);
             });
         });
-        describe("reverse", () => {
-            it("reverse", () => {
-                const actual = chain.reverse([1, 2, 3, 4]).array;
-                expect(actual).toEqual([4, 3, 2, 1]);
-            })
-        })
-    })
-    describe("chain iterable", () => {
-        describe("can use as Iterable", () => {
-            it("from constuctor", () => {
-                const iterable = new ChainIterable([1, 2, 3, 4, 5]);
-                const actual = chain.filter(iterable, x => x === 5)
-                expect(actual[Symbol.iterator]().next().value).toEqual(5);
-            });
-            it("from chain", () => {
-                const iterable = chain([1, 2, 3, 4, 5]);
-                const actual = chain.filter(iterable, x => x === 5)
-                expect(actual[Symbol.iterator]().next().value).toEqual(5);
-            });
-        });
-        describe("map and filter", () => {
-            it("only map", () => {
-                const actual = chain([1, 2, 3, 4]).map(x => x + 50).array;
-                expect(actual).toEqual([51, 52, 53, 54])
-            });
-            it("only filter", () => {
-                const actual = chain(["1", "2"]).map(x => parseInt(x)).array;
-                expect(actual).toEqual([1, 2]);
-            });
-            it("map after filter", () => {
-                const actual = chain([1, 2, 3, 4, 5])
-                    .filter(x => x % 2 == 0)
-                    .map(x => x * 2)
-                    .array;
-                expect(actual).toEqual([4, 8]);
-            });
-            it("filter after map", () => {
-                const actual = chain([1, 2, 3, 4, 5])
-                    .map(x => x.toString())
-                    .filter(x => x !== "1")
-                    .array;
-                expect(actual).toEqual(["2", "3", "4", "5"]);
-            });
-            it("map after filter with type guard", () => {
-                const actual = chain(["2", 3, "4", "5"])
-                    .filter(isNumber)
-                    .map(x => x + 3)
-                    .array;
-                expect(actual).toEqual([6])
-            });
-        })
     })
 })
