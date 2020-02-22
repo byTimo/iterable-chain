@@ -281,6 +281,12 @@ describe("chain", () => {
                 expect(actual).toBe(3);
             });
         });
+        describe("reverse", () => {
+            it("reverse", () => {
+                const actual = chain.reverse([1, 2, 3, 4]).array;
+                expect(actual).toEqual([4, 3, 2, 1]);
+            })
+        })
     })
     describe("chain iterable", () => {
         describe("can use as Iterable", () => {

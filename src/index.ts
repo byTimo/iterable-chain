@@ -30,6 +30,9 @@ export const chain = (function () {
     create.take = function <T>(source: Iterable<T>, count: number): ChainIterable<T> {
         return new ChainIterable(takeGenerator(source, count));
     }
+    create.reverse = function <T>(source: Iterable<T>): ChainIterable<T> {
+        return new ChainIterable(reverseGenerator(source));
+    }
     create.some = some;
     create.every = every;
     create.count = count;
@@ -128,6 +131,10 @@ export class ChainIterable<T> implements Iterable<T> {
 
     take = (count: number): ChainIterable<T> => {
         return chain.take(this.source, count);
+    }
+
+    reverse = (): ChainIterable<T> => {
+        return chain.reverse(this.source);
     }
 }
 
@@ -231,6 +238,13 @@ function* takeGenerator<T>(source: Iterable<T>, count: number) {
         yield result.value;
         count--;
         result = iterator.next();
+    }
+}
+
+function* reverseGenerator<T>(source: Iterable<T>) {
+    const buffer = Array.from(source);
+    for (let i = 0; i < buffer.length; i++) {
+        yield buffer[buffer.length - 1];
     }
 }
 
