@@ -10,8 +10,8 @@
 * ✅ single, singleOrDefault (Single, SingelOrDefault)
 * ✅ last, lastOrDefault (Last, LastOrDefault)
 * ✅ count, contains (Count, Contains)
-* ❌ distinct (Distinct)
-* ❌ ? empty (Empty) or unit
+* ✅ distinct (Distinct)
+* - ? empty (Empty) or unit
 * ✅ skip, take (Skip, Take)
 * ✅ concat (Concat)
 * ❌ except, intersect, union (Except, Intersect, Union)

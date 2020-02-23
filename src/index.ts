@@ -1,5 +1,5 @@
 import { ChainIterable } from "./chainIterable";
-import { rangeGenerator, repeatGenerator, mapGenerator, appendGenerator, prependGenerator, concatGenerator, skipGenerator, takeGenerator, reverseGenerator, filterGenerator } from "./generators";
+import { rangeGenerator, repeatGenerator, mapGenerator, appendGenerator, prependGenerator, concatGenerator, skipGenerator, takeGenerator, reverseGenerator, filterGenerator, distinctGenerator } from "./generators";
 import { some, every, contains, first, firstOrDefault, single, singleOrDefault, last, lastOrDefault, count } from "./functions";
 
 export const chain = (function () {
@@ -33,6 +33,9 @@ export const chain = (function () {
     }
     create.reverse = function <T>(source: Iterable<T>): ChainIterable<T> {
         return new ChainIterable(reverseGenerator(source));
+    }
+    create.distinct = function<T>(source: Iterable<T>, stringifier?: (item: T) => string): ChainIterable<T> {
+        return new ChainIterable(distinctGenerator(source, stringifier));
     }
     create.some = some;
     create.every = every;

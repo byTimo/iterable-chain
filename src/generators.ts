@@ -79,3 +79,15 @@ export function* reverseGenerator<T>(source: Iterable<T>) {
         yield buffer[buffer.length - i - 1];
     }
 }
+
+export function* distinctGenerator<T>(source: Iterable<T>, stringifier?: (item: T) => string) {
+    stringifier = stringifier || (x => x as any);
+    const set = new Set<string>();
+    for (const item of source) {
+        const key = stringifier(item)
+        if (!set.has(key)) {
+            set.add(key);
+            yield item
+        }
+    }
+}

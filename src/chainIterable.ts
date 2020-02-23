@@ -88,4 +88,8 @@ export class ChainIterable<T> implements Iterable<T> {
     reverse = (): ChainIterable<T> => {
         return chain.reverse(this.source);
     }
+
+    distinct = (stringifier?: (item: T) => string): ChainIterable<T> => {
+        return chain.distinct(this.source);
+    }
 }
