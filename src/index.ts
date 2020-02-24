@@ -1,6 +1,7 @@
 import { ChainIterable } from "./chainIterable";
-import { rangeGenerator, repeatGenerator, mapGenerator, appendGenerator, prependGenerator, concatGenerator, skipGenerator, takeGenerator, reverseGenerator, filterGenerator, distinctGenerator, exceptGenerator, intersectGenerator, unionGenerator, groupByGenerator } from "./generators";
+import { rangeGenerator, repeatGenerator, mapGenerator, appendGenerator, prependGenerator, concatGenerator, skipGenerator, takeGenerator, reverseGenerator, filterGenerator, distinctGenerator, exceptGenerator, intersectGenerator, unionGenerator, groupByGenerator, groupComparedByGenerator } from "./generators";
 import { some, every, contains, first, firstOrDefault, single, singleOrDefault, last, lastOrDefault, count } from "./functions";
+import { KeyValue } from "./common";
 
 export const chain = (function () {
     const create = function <T>(source: Iterable<T>) {
@@ -48,6 +49,9 @@ export const chain = (function () {
     }
     create.groupBy = function <T, TKey extends string | number | symbol, TValue = T>(source: Iterable<T>, keySelector: (item: T) => TKey, valueSelector?: (item: T) => TValue) {
         return new ChainIterable(groupByGenerator(source, keySelector, valueSelector));
+    }
+    create.groupComparedBy = function <T, TKey, TValue = T>(source: Iterable<T>, keySelector: (item: T) => TKey, keyComparer?: (a: TKey, b: TKey) => boolean, valueSelector?: (item: T) => TValue) {
+        return new ChainIterable(groupComparedByGenerator(source, keySelector, keyComparer, valueSelector));
     }
     create.some = some;
     create.every = every;

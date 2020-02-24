@@ -1,4 +1,4 @@
-import { KeyValue, selfSelector } from "./common";
+import { KeyValue, selfSelector, defaultComparer } from "./common";
 
 export function* objectGenerator<TKey extends string | number | symbol, TValue>(obj: Record<TKey, TValue>): Generator<KeyValue<string, TValue>> {
     for (const key in obj) {
@@ -127,7 +127,10 @@ export function unionGenerator<T>(first: Iterable<T>, second: Iterable<T>, strin
     return distinctGenerator(concatGenerator(first, second), stringifier);
 }
 
-export function groupByGenerator<T, TKey extends string | number | symbol, TValue = T>(source: Iterable<T>, keySelector: (item: T) => TKey, valueSelector?: (item: T) => TValue) {
+export function groupByGenerator<T, TKey extends string | number | symbol, TValue = T>(
+    source: Iterable<T>,
+    keySelector: (item: T) => TKey,
+    valueSelector?: (item: T) => TValue) {
     valueSelector = valueSelector || selfSelector;
     const record: Record<TKey, TValue[]> = {} as any;
     for (const item of source) {
@@ -138,4 +141,24 @@ export function groupByGenerator<T, TKey extends string | number | symbol, TValu
         record[key].push(valueSelector(item))
     }
     return objectGenerator(record);
+}
+
+export function groupComparedByGenerator<T, TKey, TValue = T>(
+    source: Iterable<T>,
+    keySelector: (item: T) => TKey,
+    keyComparer?: (a: TKey, b: TKey) => boolean,
+    valueSelector?: (item: T) => TValue) {
+    keyComparer = keyComparer || defaultComparer;
+    valueSelector = valueSelector || selfSelector;
+    const result: Array<{ key: TKey, value: TValue[] }> = [];
+    for (const item of source) {
+        const key = keySelector(item);
+        let pair = result.find(x => keyComparer!(x.key, key));
+        if (pair == null) {
+            pair = { key, value: [] };
+            result.push(pair);
+        }
+        pair.value.push(valueSelector(item));
+    }
+    return result;
 }

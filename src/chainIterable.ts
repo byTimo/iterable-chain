@@ -122,4 +122,8 @@ export class ChainIterable<T> implements Iterable<T> {
     groupBy = <TKey extends string | number | symbol, TValue = T>(keySelector: (item: T) => TKey, valueSelector?: (item: T) => TValue) => {
         return chain.groupBy(this.source, keySelector, valueSelector);
     }
+
+    groupComparedBy = <TKey, TValue = T>(keySelector: (item: T) => TKey, keyComparer?: (a: TKey, b: TKey) => boolean, valueSelector?: (item: T) => TValue) => {
+        return chain.groupComparedBy(this.source, keySelector, keyComparer, valueSelector);
+    }
 }
