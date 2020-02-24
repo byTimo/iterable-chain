@@ -1,3 +1,5 @@
+const defaultStringifier = <T>(x: T) => x as any
+
 export function* rangeGenerator(start: number, count: number) {
     for (let i = 0; i < count; i++) {
         yield start + i;
@@ -81,7 +83,7 @@ export function* reverseGenerator<T>(source: Iterable<T>) {
 }
 
 export function* distinctGenerator<T>(source: Iterable<T>, stringifier?: (item: T) => string) {
-    stringifier = stringifier || (x => x as any);
+    stringifier = stringifier || defaultStringifier;
     const set = new Set<string>();
     for (const item of source) {
         const key = stringifier(item)
@@ -89,5 +91,32 @@ export function* distinctGenerator<T>(source: Iterable<T>, stringifier?: (item: 
             set.add(key);
             yield item
         }
+    }
+}
+
+export function* exceptGenerator<T>(first: Iterable<T>, second: Iterable<T>, stringifier?: (item: T) => string) {
+    stringifier = stringifier || defaultStringifier;
+    const set = new Set<string>(mapGenerator(second, stringifier));
+    for (const item of first) {
+        if (!set.has(stringifier(item))) {
+            yield item;
+        }
+    }
+}
+
+export function* intersectGenerator<T>(first: Iterable<T>, second: Iterable<T>, stringifier?: (item: T) => string) {
+    stringifier = stringifier || defaultStringifier;
+    const set = new Set<string>(mapGenerator(second, stringifier));
+    for (const item of first) {
+        if (set.has(stringifier(item))) {
+            yield item;
+        }
+    }
+}
+
+export function* unionGenerator<T>(first: Iterable<T>, second: Iterable<T>, stringifier?: (item: T) => string) {
+    stringifier = stringifier || defaultStringifier;
+    for (const item of distinctGenerator(concatGenerator(first, second), stringifier)) {
+        yield item;
     }
 }

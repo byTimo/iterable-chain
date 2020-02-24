@@ -1,5 +1,5 @@
 import { ChainIterable } from "./chainIterable";
-import { rangeGenerator, repeatGenerator, mapGenerator, appendGenerator, prependGenerator, concatGenerator, skipGenerator, takeGenerator, reverseGenerator, filterGenerator, distinctGenerator } from "./generators";
+import { rangeGenerator, repeatGenerator, mapGenerator, appendGenerator, prependGenerator, concatGenerator, skipGenerator, takeGenerator, reverseGenerator, filterGenerator, distinctGenerator, exceptGenerator, intersectGenerator, unionGenerator } from "./generators";
 import { some, every, contains, first, firstOrDefault, single, singleOrDefault, last, lastOrDefault, count } from "./functions";
 
 export const chain = (function () {
@@ -34,8 +34,17 @@ export const chain = (function () {
     create.reverse = function <T>(source: Iterable<T>): ChainIterable<T> {
         return new ChainIterable(reverseGenerator(source));
     }
-    create.distinct = function<T>(source: Iterable<T>, stringifier?: (item: T) => string): ChainIterable<T> {
+    create.distinct = function <T>(source: Iterable<T>, stringifier?: (item: T) => string): ChainIterable<T> {
         return new ChainIterable(distinctGenerator(source, stringifier));
+    }
+    create.except = function <T>(first: Iterable<T>, second: Iterable<T>, stringifier?: (item: T) => string): ChainIterable<T> {
+        return new ChainIterable(exceptGenerator(first, second, stringifier));
+    }
+    create.intersect = function <T>(first: Iterable<T>, second: Iterable<T>, stringifier?: (item: T) => string): ChainIterable<T> {
+        return new ChainIterable(intersectGenerator(first, second, stringifier));
+    }
+    create.union = function <T>(first: Iterable<T>, second: Iterable<T>, stringifier?: (item: T) => string): ChainIterable<T> {
+        return new ChainIterable(unionGenerator(first, second, stringifier));
     }
     create.some = some;
     create.every = every;

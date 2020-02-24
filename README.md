@@ -14,7 +14,7 @@
 * - ? empty (Empty) or unit
 * ✅ skip, take (Skip, Take)
 * ✅ concat (Concat)
-* ❌ except, intersect, union (Except, Intersect, Union)
+* ✅ except, intersect, union (Except, Intersect, Union)
 * ✅ reverse (Reverse)
 * ❌ groupBy, join, zip (GroupBy, Join, Zip)
 * ❌ min, max, avarage, sum - only for numbers

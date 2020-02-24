@@ -118,6 +118,62 @@ describe("chain global", () => {
                 expect(actual).toEqual([4, 3, 2, 1]);
             })
         })
+        describe("distinct", () => {
+            it("number collection", () => {
+                const actual = chain.distinct([1, 1, 2, 3, 4, 4, 10]).array;
+                expect(actual).toEqual([1, 2, 3, 4, 10]);
+            });
+            it("object collection without stringifier - distinct don't work", () => {
+                const actual = chain.distinct([{ a: 10 }, { a: 10 }]).array;
+                expect(actual).toEqual([{ a: 10 }, { a: 10 }]);
+            });
+            it("object collection with stringifier", () => {
+                const actual = chain.distinct([{ a: 10 }, { a: 10 }], x => x.a.toString()).array;
+                expect(actual).toEqual([{ a: 10 }]);
+            })
+        })
+        describe("except", () => {
+            it("number collection", () => {
+                const actual = chain.except([1, 2, 3], [2, 3, 4]).array;
+                expect(actual).toEqual([1]);
+            });
+            it("object collection without stringifier - distinct don't work", () => {
+                const actual = chain.except([{ a: 10 }, { a: 15 }], [{ a: 15 }]).array;
+                expect(actual).toEqual([{ a: 10 }, { a: 15 }]);
+            });
+            it("object collection with stringifier", () => {
+                const actual = chain.except([{ a: 10 }, { a: 15 }], [{ a: 15 }], x => x.a.toString()).array;
+                expect(actual).toEqual([{ a: 10 }]);
+            })
+        })
+        describe("intersect", () => {
+            it("number collection", () => {
+                const actual = chain.intersect([1, 2, 3], [2, 3, 4]).array;
+                expect(actual).toEqual([2, 3]);
+            });
+            it("object collection without stringifier - distinct don't work", () => {
+                const actual = chain.intersect([{ a: 10 }, { a: 15 }], [{ a: 15 }]).array;
+                expect(actual).toEqual([]);
+            });
+            it("object collection with stringifier", () => {
+                const actual = chain.intersect([{ a: 10 }, { a: 15 }], [{ a: 15 }], x => x.a.toString()).array;
+                expect(actual).toEqual([{ a: 15 }]);
+            })
+        })
+        describe("union", () => {
+            it("number collection", () => {
+                const actual = chain.union([1, 2, 3], [2, 3, 4]).array;
+                expect(actual).toEqual([1, 2, 3, 4]);
+            });
+            it("object collection without stringifier - distinct don't work", () => {
+                const actual = chain.union([{ a: 10 }, { a: 15 }], [{ a: 15 }]).array;
+                expect(actual).toEqual([{ a: 10 }, { a: 15 }, { a: 15 }]);
+            });
+            it("object collection with stringifier", () => {
+                const actual = chain.union([{ a: 10 }, { a: 15 }], [{ a: 15 }], x => x.a.toString()).array;
+                expect(actual).toEqual([{ a: 10 }, { a: 15 }]);
+            })
+        })
     });
 
     describe("functions", () => {
@@ -289,19 +345,5 @@ describe("chain global", () => {
                 expect(actual).toBe(3);
             });
         });
-        describe("distinct", () => {
-            it("number collection", () => {
-                const actual = chain.distinct([1, 1, 2, 3, 4, 4, 10]).array;
-                expect(actual).toEqual([1, 2, 3, 4, 10]);
-            });
-            it("object collection without stringifier - distinct don't work", () => {
-                const actual = chain.distinct([{ a: 10 }, { a: 10 }]).array;
-                expect(actual).toEqual([{ a: 10 }, { a: 10 }]);
-            });
-            it("object collection with stringifier", () => {
-                const actual = chain.distinct([{ a: 10 }, { a: 10 }], x => x.a.toString()).array;
-                expect(actual).toEqual([{ a: 10 }]);
-            })
-        })
     })
 })

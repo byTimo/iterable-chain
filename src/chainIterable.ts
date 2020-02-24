@@ -90,6 +90,18 @@ export class ChainIterable<T> implements Iterable<T> {
     }
 
     distinct = (stringifier?: (item: T) => string): ChainIterable<T> => {
-        return chain.distinct(this.source);
+        return chain.distinct(this.source, stringifier);
+    }
+
+    except = (other: Iterable<T>, stringifier?: (item: T) => string): ChainIterable<T> => {
+        return chain.except(this.source, other, stringifier);
+    }
+
+    intersect = (other: Iterable<T>, stringifier?: (item: T) => string): ChainIterable<T> => {
+        return chain.intersect(this.source, other, stringifier);
+    }
+
+    union = (other: Iterable<T>, stringifier?: (item: T) => string): ChainIterable<T> => {
+        return chain.union(this.source, other, stringifier);
     }
 }
