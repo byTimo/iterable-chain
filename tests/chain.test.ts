@@ -174,6 +174,20 @@ describe("chain global", () => {
                 expect(actual).toEqual([{ a: 10 }, { a: 15 }]);
             })
         })
+        describe("groupBy", () => {
+            it("group", () => {
+                const actual = chain.groupBy([1, 2, 3, 4, 5], x => x % 2).array;
+                expect(actual).toEqual([{ key: "0", value: [2, 4] }, { key: "1", value: [1, 3, 5] }])
+            });
+            it("group object without value selector", () => {
+                const actual = chain.groupBy([{ a: 10, b: 20 }, { a: 10, b: 30 }], x => x.a).array;
+                expect(actual).toEqual([{ key: "10", value: [{ a: 10, b: 20 }, { a: 10, b: 30 }] }]);
+            })
+            it("group object with value selector", () => {
+                const actual = chain.groupBy([{ a: 10, b: 20 }, { a: 10, b: 30 }], x => x.a, x => x.b).array;
+                expect(actual).toEqual([{ key: "10", value: [20, 30] }]);
+            })
+        })
     });
 
     describe("functions", () => {

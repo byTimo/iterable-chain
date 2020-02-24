@@ -1,4 +1,5 @@
 import { chain } from ".";
+import { selfSelector } from "./common";
 
 interface FilterOverride<T> {
     <S extends T>(condition: (item: T, index: number) => item is S): ChainIterable<S>
@@ -15,6 +16,19 @@ export class ChainIterable<T> implements Iterable<T> {
 
     get array(): T[] {
         return Array.from(this.source);
+    }
+
+    object = <TKey extends string | number | symbol, TValue = T>(keySelector: (item: T) => TKey, valueSelector?: (item: T) => TValue): Record<TKey, TValue> => {
+        valueSelector = valueSelector || selfSelector;
+        const result: Record<TKey, TValue> = {} as any;
+        for (const item of this.source) {
+            const key = keySelector(item);
+            if (key in result) {
+                throw new Error("Duplicate key: " + key);
+            }
+            result[key] = valueSelector(item);
+        }
+        return result;
     }
 
     map = <R>(selector: (item: T, index: number) => R): ChainIterable<R> => {
@@ -103,5 +117,9 @@ export class ChainIterable<T> implements Iterable<T> {
 
     union = (other: Iterable<T>, stringifier?: (item: T) => string): ChainIterable<T> => {
         return chain.union(this.source, other, stringifier);
+    }
+
+    groupBy = <TKey extends string | number | symbol, TValue = T>(keySelector: (item: T) => TKey, valueSelector?: (item: T) => TValue) => {
+        return chain.groupBy(this.source, keySelector, valueSelector);
     }
 }

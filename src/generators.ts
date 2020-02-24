@@ -1,4 +1,12 @@
-const defaultStringifier = <T>(x: T) => x as any
+import { KeyValue, selfSelector } from "./common";
+
+export function* objectGenerator<TKey extends string | number | symbol, TValue>(obj: Record<TKey, TValue>): Generator<KeyValue<string, TValue>> {
+    for (const key in obj) {
+        if (obj.hasOwnProperty(key)) {
+            yield { key, value: obj[key] }
+        }
+    }
+}
 
 export function* rangeGenerator(start: number, count: number) {
     for (let i = 0; i < count; i++) {
@@ -83,7 +91,7 @@ export function* reverseGenerator<T>(source: Iterable<T>) {
 }
 
 export function* distinctGenerator<T>(source: Iterable<T>, stringifier?: (item: T) => string) {
-    stringifier = stringifier || defaultStringifier;
+    stringifier = stringifier || selfSelector;
     const set = new Set<string>();
     for (const item of source) {
         const key = stringifier(item)
@@ -95,7 +103,7 @@ export function* distinctGenerator<T>(source: Iterable<T>, stringifier?: (item: 
 }
 
 export function* exceptGenerator<T>(first: Iterable<T>, second: Iterable<T>, stringifier?: (item: T) => string) {
-    stringifier = stringifier || defaultStringifier;
+    stringifier = stringifier || selfSelector;
     const set = new Set<string>(mapGenerator(second, stringifier));
     for (const item of first) {
         if (!set.has(stringifier(item))) {
@@ -105,7 +113,7 @@ export function* exceptGenerator<T>(first: Iterable<T>, second: Iterable<T>, str
 }
 
 export function* intersectGenerator<T>(first: Iterable<T>, second: Iterable<T>, stringifier?: (item: T) => string) {
-    stringifier = stringifier || defaultStringifier;
+    stringifier = stringifier || selfSelector;
     const set = new Set<string>(mapGenerator(second, stringifier));
     for (const item of first) {
         if (set.has(stringifier(item))) {
@@ -114,9 +122,20 @@ export function* intersectGenerator<T>(first: Iterable<T>, second: Iterable<T>, 
     }
 }
 
-export function* unionGenerator<T>(first: Iterable<T>, second: Iterable<T>, stringifier?: (item: T) => string) {
-    stringifier = stringifier || defaultStringifier;
-    for (const item of distinctGenerator(concatGenerator(first, second), stringifier)) {
-        yield item;
+export function unionGenerator<T>(first: Iterable<T>, second: Iterable<T>, stringifier?: (item: T) => string) {
+    stringifier = stringifier || selfSelector;
+    return distinctGenerator(concatGenerator(first, second), stringifier);
+}
+
+export function groupByGenerator<T, TKey extends string | number | symbol, TValue = T>(source: Iterable<T>, keySelector: (item: T) => TKey, valueSelector?: (item: T) => TValue) {
+    valueSelector = valueSelector || selfSelector;
+    const record: Record<TKey, TValue[]> = {} as any;
+    for (const item of source) {
+        const key = keySelector(item);
+        if (record[key] == null) {
+            record[key] = [];
+        }
+        record[key].push(valueSelector(item))
     }
+    return objectGenerator(record);
 }

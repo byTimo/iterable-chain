@@ -1,9 +1,4 @@
-const key = Symbol("chain_key");
-const marker: any = { [key]: true };
-
-const defaultCondition = () => true;
-const defalutConditionByElement = <T>(x: T) => !!x
-const defaultComparer = <T>(a: T, b: T) => a === b;
+import { defalutConditionByElement, defaultCondition, defaultComparer, marker } from "./common";
 
 export function some<T>(source: Iterable<T>, condition?: (item: T, index: number) => boolean): boolean {
     let i = 0;

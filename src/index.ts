@@ -1,5 +1,5 @@
 import { ChainIterable } from "./chainIterable";
-import { rangeGenerator, repeatGenerator, mapGenerator, appendGenerator, prependGenerator, concatGenerator, skipGenerator, takeGenerator, reverseGenerator, filterGenerator, distinctGenerator, exceptGenerator, intersectGenerator, unionGenerator } from "./generators";
+import { rangeGenerator, repeatGenerator, mapGenerator, appendGenerator, prependGenerator, concatGenerator, skipGenerator, takeGenerator, reverseGenerator, filterGenerator, distinctGenerator, exceptGenerator, intersectGenerator, unionGenerator, groupByGenerator } from "./generators";
 import { some, every, contains, first, firstOrDefault, single, singleOrDefault, last, lastOrDefault, count } from "./functions";
 
 export const chain = (function () {
@@ -45,6 +45,9 @@ export const chain = (function () {
     }
     create.union = function <T>(first: Iterable<T>, second: Iterable<T>, stringifier?: (item: T) => string): ChainIterable<T> {
         return new ChainIterable(unionGenerator(first, second, stringifier));
+    }
+    create.groupBy = function <T, TKey extends string | number | symbol, TValue = T>(source: Iterable<T>, keySelector: (item: T) => TKey, valueSelector?: (item: T) => TValue) {
+        return new ChainIterable(groupByGenerator(source, keySelector, valueSelector));
     }
     create.some = some;
     create.every = every;
