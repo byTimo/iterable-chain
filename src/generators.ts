@@ -1,9 +1,9 @@
-import { KeyValue, selfSelector, defaultComparer } from "./common";
+import {defaultComparer, KeyValue, selfSelector} from "./common";
 
 export function* objectGenerator<TKey extends string | number | symbol, TValue>(obj: Record<TKey, TValue>): Generator<KeyValue<string, TValue>> {
     for (const key in obj) {
         if (obj.hasOwnProperty(key)) {
-            yield { key, value: obj[key] }
+            yield {key, value: obj[key]};
         }
     }
 }
@@ -94,10 +94,10 @@ export function* distinctGenerator<T>(source: Iterable<T>, stringifier?: (item: 
     stringifier = stringifier || selfSelector;
     const set = new Set<string>();
     for (const item of source) {
-        const key = stringifier(item)
+        const key = stringifier(item);
         if (!set.has(key)) {
             set.add(key);
-            yield item
+            yield item;
         }
     }
 }
@@ -138,7 +138,7 @@ export function groupByGenerator<T, TKey extends string | number | symbol, TValu
         if (record[key] == null) {
             record[key] = [];
         }
-        record[key].push(valueSelector(item))
+        record[key].push(valueSelector(item));
     }
     return objectGenerator(record);
 }
@@ -155,7 +155,7 @@ export function groupComparedByGenerator<T, TKey, TValue = T>(
         const key = keySelector(item);
         let pair = result.find(x => keyComparer!(x.key, key));
         if (pair == null) {
-            pair = { key, value: [] };
+            pair = {key, value: []};
             result.push(pair);
         }
         pair.value.push(valueSelector(item));

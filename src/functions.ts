@@ -1,8 +1,8 @@
-import { defalutConditionByElement, defaultCondition, defaultComparer, marker } from "./common";
+import {defaultComparer, defaultCondition, defaultConditionByElement, marker} from "./common";
 
 export function some<T>(source: Iterable<T>, condition?: (item: T, index: number) => boolean): boolean {
     let i = 0;
-    condition = condition || defalutConditionByElement;
+    condition = condition || defaultConditionByElement;
     for (const item of source) {
         if (condition(item, i)) {
             return true;
@@ -13,7 +13,7 @@ export function some<T>(source: Iterable<T>, condition?: (item: T, index: number
 
 export function every<T>(source: Iterable<T>, condition?: (item: T, index: number) => boolean): boolean {
     let i = 0;
-    condition = condition || defalutConditionByElement;
+    condition = condition || defaultConditionByElement;
     for (const item of source) {
         if (!condition(item, i)) {
             return false;
