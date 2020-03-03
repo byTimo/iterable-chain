@@ -14,7 +14,7 @@
 * ✅ except, intersect, union (Except, Intersect, Union)
 * ✅ reverse (Reverse)
 * ✅ groupBy, groupComparedBy
-* ❌ array, map, object, set (ToArray, ToDictionary, ToHashSet)
+* ✅ array, map, object, set (ToArray, ToDictionary, ToHashSet)
 
 -- release
 

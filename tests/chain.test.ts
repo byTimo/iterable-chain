@@ -9,30 +9,30 @@ describe("chain global", () => {
     describe("generators", () => {
         describe("range", () => {
             it("start from zero", () => {
-                const actual = chain.range(0, 5).array;
+                const actual = chain.range(0, 5).toArray();
                 expect(actual).toEqual([0, 1, 2, 3, 4]);
             });
             it("start from 5", () => {
-                const actual = chain.range(5, 5).array;
+                const actual = chain.range(5, 5).toArray();
                 expect(actual).toEqual([5, 6, 7, 8, 9]);
             });
             it("count is zero", () => {
-                const actual = chain.range(5, 0).array;
+                const actual = chain.range(5, 0).toArray();
                 expect(actual).toEqual([]);
             });
             it("count less then zero", () => {
-                const actual = chain.range(5, -1).array;
+                const actual = chain.range(5, -1).toArray();
                 expect(actual).toEqual([]);
             });
         });
         describe("repeat", () => {
             it("repeat number", () => {
-                const actual = chain.repate(10, 5).array;
+                const actual = chain.repate(10, 5).toArray();
                 expect(actual).toEqual([10, 10, 10, 10, 10]);
             });
             it("repeat object", () => {
                 const obj = {a: 10};
-                const actual = chain.repate(obj, 3).array;
+                const actual = chain.repate(obj, 3).toArray();
                 expect(actual).toEqual([obj, obj, obj]);
                 expect(actual[0]).toBe(obj);
                 expect(actual[1]).toBe(obj);
@@ -40,16 +40,16 @@ describe("chain global", () => {
             });
         });
         it("map", () => {
-            const actual = chain.map([1, 2, 3, 4], x => x + 50).array;
+            const actual = chain.map([1, 2, 3, 4], x => x + 50).toArray();
             expect(actual).toEqual([51, 52, 53, 54]);
         });
         describe("filter", () => {
             it("array - condition return boolean", () => {
-                const actual = chain.filter([1, 2, 3, 4], x => x % 2 == 0).array;
+                const actual = chain.filter([1, 2, 3, 4], x => x % 2 == 0).toArray();
                 expect(actual).toEqual([2, 4]);
             });
             it("array - type guard", () => {
-                const actual = chain.filter([1, "2", 3, "4"], isNumber).array;
+                const actual = chain.filter([1, "2", 3, "4"], isNumber).toArray();
                 const first: number = actual[0]; //type check
                 expect(actual).toEqual([1, 3]);
             });
@@ -68,129 +68,129 @@ describe("chain global", () => {
         });
         describe("append, prepend, concat", () => {
             it("append", () => {
-                const actual = chain.append([1, 2, 3, 4, 5], 15).array;
+                const actual = chain.append([1, 2, 3, 4, 5], 15).toArray();
                 expect(actual).toEqual([15, 1, 2, 3, 4, 5]);
             });
             it("prepend", () => {
-                const actual = chain.prepend([1, 2, 3, 4, 5], 15).array;
+                const actual = chain.prepend([1, 2, 3, 4, 5], 15).toArray();
                 expect(actual).toEqual([1, 2, 3, 4, 5, 15]);
             });
             it("concat same type", () => {
-                const actual = chain.concat([1, 2, 3], [4, 5, 6]).array;
+                const actual = chain.concat([1, 2, 3], [4, 5, 6]).toArray();
                 expect(actual).toEqual([1, 2, 3, 4, 5, 6]);
             });
             it("concat different types", () => {
-                const actual = chain.concat([1, 2, 3], ["4", "5", "6"]).array;
+                const actual = chain.concat([1, 2, 3], ["4", "5", "6"]).toArray();
                 expect(actual).toEqual([1, 2, 3, "4", "5", "6"]);
             });
         });
         describe("skip", () => {
             it("empty collection, count is greater of zero", () => {
-                const actual = chain.skip([], 50).array;
+                const actual = chain.skip([], 50).toArray();
                 expect(actual).toEqual([]);
             });
             it("not empty collection, count is zero", () => {
-                const actual = chain.skip([1, 2, 3], 0).array;
+                const actual = chain.skip([1, 2, 3], 0).toArray();
                 expect(actual).toEqual([1, 2, 3]);
             });
             it("skip 3 items", () => {
-                const actual = chain.skip([1, 2, 3, 4], 3).array;
+                const actual = chain.skip([1, 2, 3, 4], 3).toArray();
                 expect(actual).toEqual([4]);
             });
         });
         describe("take", () => {
             it("empty collection, count is greater of zero", () => {
-                const actual = chain.take([], 50).array;
+                const actual = chain.take([], 50).toArray();
                 expect(actual).toEqual([]);
             });
             it("not empty collection, count is zero", () => {
-                const actual = chain.take([1, 2, 3], 0).array;
+                const actual = chain.take([1, 2, 3], 0).toArray();
                 expect(actual).toEqual([]);
             });
             it("take 3 items", () => {
-                const actual = chain.take([1, 2, 3, 4], 3).array;
+                const actual = chain.take([1, 2, 3, 4], 3).toArray();
                 expect(actual).toEqual([1, 2, 3]);
             });
         });
         describe("reverse", () => {
             it("reverse", () => {
-                const actual = chain.reverse([1, 2, 3, 4]).array;
+                const actual = chain.reverse([1, 2, 3, 4]).toArray();
                 expect(actual).toEqual([4, 3, 2, 1]);
             });
         });
         describe("distinct", () => {
             it("number collection", () => {
-                const actual = chain.distinct([1, 1, 2, 3, 4, 4, 10]).array;
+                const actual = chain.distinct([1, 1, 2, 3, 4, 4, 10]).toArray();
                 expect(actual).toEqual([1, 2, 3, 4, 10]);
             });
             it("object collection without stringifier - distinct don't work", () => {
-                const actual = chain.distinct([{a: 10}, {a: 10}]).array;
+                const actual = chain.distinct([{a: 10}, {a: 10}]).toArray();
                 expect(actual).toEqual([{a: 10}, {a: 10}]);
             });
             it("object collection with stringifier", () => {
-                const actual = chain.distinct([{a: 10}, {a: 10}], x => x.a.toString()).array;
+                const actual = chain.distinct([{a: 10}, {a: 10}], x => x.a.toString()).toArray();
                 expect(actual).toEqual([{a: 10}]);
             });
         });
         describe("except", () => {
             it("number collection", () => {
-                const actual = chain.except([1, 2, 3], [2, 3, 4]).array;
+                const actual = chain.except([1, 2, 3], [2, 3, 4]).toArray();
                 expect(actual).toEqual([1]);
             });
             it("object collection without stringifier - distinct don't work", () => {
-                const actual = chain.except([{a: 10}, {a: 15}], [{a: 15}]).array;
+                const actual = chain.except([{a: 10}, {a: 15}], [{a: 15}]).toArray();
                 expect(actual).toEqual([{a: 10}, {a: 15}]);
             });
             it("object collection with stringifier", () => {
-                const actual = chain.except([{a: 10}, {a: 15}], [{a: 15}], x => x.a.toString()).array;
+                const actual = chain.except([{a: 10}, {a: 15}], [{a: 15}], x => x.a.toString()).toArray();
                 expect(actual).toEqual([{a: 10}]);
             });
         });
         describe("intersect", () => {
             it("number collection", () => {
-                const actual = chain.intersect([1, 2, 3], [2, 3, 4]).array;
+                const actual = chain.intersect([1, 2, 3], [2, 3, 4]).toArray();
                 expect(actual).toEqual([2, 3]);
             });
             it("object collection without stringifier - distinct don't work", () => {
-                const actual = chain.intersect([{a: 10}, {a: 15}], [{a: 15}]).array;
+                const actual = chain.intersect([{a: 10}, {a: 15}], [{a: 15}]).toArray();
                 expect(actual).toEqual([]);
             });
             it("object collection with stringifier", () => {
-                const actual = chain.intersect([{a: 10}, {a: 15}], [{a: 15}], x => x.a.toString()).array;
+                const actual = chain.intersect([{a: 10}, {a: 15}], [{a: 15}], x => x.a.toString()).toArray();
                 expect(actual).toEqual([{a: 15}]);
             });
         });
         describe("union", () => {
             it("number collection", () => {
-                const actual = chain.union([1, 2, 3], [2, 3, 4]).array;
+                const actual = chain.union([1, 2, 3], [2, 3, 4]).toArray();
                 expect(actual).toEqual([1, 2, 3, 4]);
             });
             it("object collection without stringifier - distinct don't work", () => {
-                const actual = chain.union([{a: 10}, {a: 15}], [{a: 15}]).array;
+                const actual = chain.union([{a: 10}, {a: 15}], [{a: 15}]).toArray();
                 expect(actual).toEqual([{a: 10}, {a: 15}, {a: 15}]);
             });
             it("object collection with stringifier", () => {
-                const actual = chain.union([{a: 10}, {a: 15}], [{a: 15}], x => x.a.toString()).array;
+                const actual = chain.union([{a: 10}, {a: 15}], [{a: 15}], x => x.a.toString()).toArray();
                 expect(actual).toEqual([{a: 10}, {a: 15}]);
             });
         });
         describe("groupBy", () => {
             it("group", () => {
-                const actual = chain.groupBy([1, 2, 3, 4, 5], x => x % 2).array;
+                const actual = chain.groupBy([1, 2, 3, 4, 5], x => x % 2).toArray();
                 expect(actual).toEqual([{key: "0", value: [2, 4]}, {key: "1", value: [1, 3, 5]}]);
             });
             it("group object without value selector", () => {
-                const actual = chain.groupBy([{a: 10, b: 20}, {a: 10, b: 30}], x => x.a).array;
+                const actual = chain.groupBy([{a: 10, b: 20}, {a: 10, b: 30}], x => x.a).toArray();
                 expect(actual).toEqual([{key: "10", value: [{a: 10, b: 20}, {a: 10, b: 30}]}]);
             });
             it("group object with value selector", () => {
-                const actual = chain.groupBy([{a: 10, b: 20}, {a: 10, b: 30}], x => x.a, x => x.b).array;
+                const actual = chain.groupBy([{a: 10, b: 20}, {a: 10, b: 30}], x => x.a, x => x.b).toArray();
                 expect(actual).toEqual([{key: "10", value: [20, 30]}]);
             });
         });
         describe("groupComparedBy", () => {
             it("number collection", () => {
-                const actual = chain.groupComparedBy([1, 2, 3, 4, 5], x => x % 2).array;
+                const actual = chain.groupComparedBy([1, 2, 3, 4, 5], x => x % 2).toArray();
                 expect(actual).toEqual([{key: 1, value: [1, 3, 5]}, {key: 0, value: [2, 4]}]);
             });
             it("key is object, without comparer and value selector", () => {
@@ -198,7 +198,7 @@ describe("chain global", () => {
                     {a: {c: true}, b: 20},
                     {a: {c: true}, b: 5},
                     {a: {c: false}, b: 20}
-                ], x => x.a).array;
+                ], x => x.a).toArray();
                 expect(actual).toEqual([
                     {key: {c: true}, value: [{a: {c: true}, b: 20}]},
                     {key: {c: true}, value: [{a: {c: true}, b: 5}]},
@@ -210,7 +210,7 @@ describe("chain global", () => {
                     {a: {c: true}, b: 20},
                     {a: {c: true}, b: 5},
                     {a: {c: false}, b: 20}
-                ], x => x.a, (a, b) => a.c === b.c).array;
+                ], x => x.a, (a, b) => a.c === b.c).toArray();
                 expect(actual).toEqual([
                     {key: {c: true}, value: [{a: {c: true}, b: 20}, {a: {c: true}, b: 5}]},
                     {key: {c: false}, value: [{a: {c: false}, b: 20}]}
@@ -221,7 +221,7 @@ describe("chain global", () => {
                     {a: {c: true}, b: 20},
                     {a: {c: true}, b: 5},
                     {a: {c: false}, b: 20}
-                ], x => x.a, (a, b) => a.c === b.c, x => x.b).array;
+                ], x => x.a, (a, b) => a.c === b.c, x => x.b).toArray();
                 expect(actual).toEqual([
                     {key: {c: true}, value: [20, 5]},
                     {key: {c: false}, value: [20]}

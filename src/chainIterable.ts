@@ -11,15 +11,15 @@ export class ChainIterable<T> implements Iterable<T> {
     constructor(private readonly source: Iterable<T>) {
     }
 
-    [Symbol.iterator](): Iterator<T, any, undefined> {
+    [Symbol.iterator](): Iterator<T> {
         return this.source[Symbol.iterator]();
     }
 
-    get array(): T[] {
+    toArray = (): T[] => {
         return Array.from(this.source);
-    }
+    };
 
-    object = <TKey extends string | number | symbol, TValue = T>(keySelector: (item: T) => TKey, valueSelector?: (item: T) => TValue): Record<TKey, TValue> => {
+    toObject = <TKey extends string | number | symbol, TValue = T>(keySelector: (item: T) => TKey, valueSelector?: (item: T) => TValue): Record<TKey, TValue> => {
         valueSelector = valueSelector || selfSelector;
         const result: Record<TKey, TValue> = {} as any;
         for (const item of this.source) {
@@ -30,6 +30,23 @@ export class ChainIterable<T> implements Iterable<T> {
             result[key] = valueSelector(item);
         }
         return result;
+    };
+
+    toMap = <TKey extends string | number | symbol, TValue = T>(keySelector: (item: T) => TKey, valueSelector?: (item: T) => TValue): Map<TKey, TValue> => {
+        valueSelector = valueSelector || selfSelector;
+        const map: Map<TKey, TValue> = new Map();
+        for (const item of this.source) {
+            const key = keySelector(item);
+            if (map.has(key)) {
+                throw new Error("Duplicate key: " + key);
+            }
+            map.set(key, valueSelector(item));
+        }
+        return map;
+    };
+
+    toSet = (): Set<T> => {
+        return new Set(this.source);
     };
 
     map = <R>(selector: (item: T, index: number) => R): ChainIterable<R> => {
