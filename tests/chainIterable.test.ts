@@ -12,12 +12,12 @@ describe("chain iterable", () => {
             expect(actual).toEqual([1, 2, 3, 4]);
         });
         it("to object without value selector", () => {
-            const actaul = new ChainIterable([{a: 1}, {a: 2}, {a: 3}]).object(x => x.a);
-            expect(actaul).toEqual({1: {a: 1}, 2: {a: 2}, 3: {a: 3}});
+            const actual = new ChainIterable([{a: 1}, {a: 2}, {a: 3}]).object(x => x.a);
+            expect(actual).toEqual({1: {a: 1}, 2: {a: 2}, 3: {a: 3}});
         });
         it("to object with value selector", () => {
-            const actaul = new ChainIterable([{a: 1}, {a: 2}, {a: 3}]).object(x => x.a, x => x.a);
-            expect(actaul).toEqual({1: 1, 2: 2, 3: 3});
+            const actual = new ChainIterable([{a: 1}, {a: 2}, {a: 3}]).object(x => x.a, x => x.a);
+            expect(actual).toEqual({1: 1, 2: 2, 3: 3});
         });
         it("to object with duplicate key - throw error", () => {
             expect(() => {
