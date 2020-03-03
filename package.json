@@ -2,6 +2,7 @@
   "name": "iter-chain",
   "version": "1.0.0",
   "main": "index.js",
+  "types": "index.d.ts",
   "repository": "git@github.com:byTimo/iter-chain.git",
   "author": "byTimo <race.timo@gmail.com>",
   "license": "MIT",
