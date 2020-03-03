@@ -1,5 +1,5 @@
-import { ChainIterable } from "../src/chainIterable";
-import { chain } from "../src";
+import {ChainIterable} from "../src/chainIterable";
+import {chain} from "../src";
 
 function isNumber(a: number | string): a is number {
     return typeof a === "number";
@@ -12,35 +12,35 @@ describe("chain iterable", () => {
             expect(actual).toEqual([1, 2, 3, 4]);
         });
         it("to object without value selector", () => {
-            const actaul = new ChainIterable([{ a: 1 }, { a: 2 }, { a: 3 }]).object(x => x.a);
-            expect(actaul).toEqual({ 1: { a: 1 }, 2: { a: 2 }, 3: { a: 3 } });
+            const actaul = new ChainIterable([{a: 1}, {a: 2}, {a: 3}]).object(x => x.a);
+            expect(actaul).toEqual({1: {a: 1}, 2: {a: 2}, 3: {a: 3}});
         });
         it("to object with value selector", () => {
-            const actaul = new ChainIterable([{ a: 1 }, { a: 2 }, { a: 3 }]).object(x => x.a, x => x.a);
-            expect(actaul).toEqual({ 1: 1, 2: 2, 3: 3 });
+            const actaul = new ChainIterable([{a: 1}, {a: 2}, {a: 3}]).object(x => x.a, x => x.a);
+            expect(actaul).toEqual({1: 1, 2: 2, 3: 3});
         });
         it("to object with duplicate key - throw error", () => {
             expect(() => {
-                new ChainIterable([1, 2, 3, 4]).object(x => x % 2)
+                new ChainIterable([1, 2, 3, 4]).object(x => x % 2);
             }).toThrow();
-        })
-    })
+        });
+    });
     describe("can use as Iterable", () => {
         it("from constuctor", () => {
             const iterable = new ChainIterable([1, 2, 3, 4, 5]);
-            const actual = chain.filter(iterable, x => x === 5)
+            const actual = chain.filter(iterable, x => x === 5);
             expect(actual[Symbol.iterator]().next().value).toEqual(5);
         });
         it("from chain", () => {
             const iterable = chain([1, 2, 3, 4, 5]);
-            const actual = chain.filter(iterable, x => x === 5)
+            const actual = chain.filter(iterable, x => x === 5);
             expect(actual[Symbol.iterator]().next().value).toEqual(5);
         });
     });
     describe("map and filter", () => {
         it("only map", () => {
             const actual = chain([1, 2, 3, 4]).map(x => x + 50).array;
-            expect(actual).toEqual([51, 52, 53, 54])
+            expect(actual).toEqual([51, 52, 53, 54]);
         });
         it("only filter", () => {
             const actual = chain(["1", "2"]).map(x => parseInt(x)).array;
@@ -65,7 +65,7 @@ describe("chain iterable", () => {
                 .filter(isNumber)
                 .map(x => x + 3)
                 .array;
-            expect(actual).toEqual([6])
+            expect(actual).toEqual([6]);
         });
-    })
-})
+    });
+});
