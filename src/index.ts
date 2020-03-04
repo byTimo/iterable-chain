@@ -37,7 +37,7 @@ export const chain = (function () {
     create.range = function (start: number, count: number): ChainIterable<number> {
         return new ChainIterable(rangeGenerator(start, count));
     };
-    create.repate = function <T>(value: T, count: number): ChainIterable<T> {
+    create.repeat = function <T>(value: T, count: number): ChainIterable<T> {
         return new ChainIterable(repeatGenerator(value, count));
     };
     create.map = function <T, R>(source: Iterable<T>, selector: (item: T, index: number) => R) {
