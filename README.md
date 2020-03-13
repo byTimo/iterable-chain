@@ -18,9 +18,13 @@
 
 -- release
 
-* ❌ zip
-* ❌ reduce (Aggregate)
 * ❌ flatMap (SelectMany)
-* ❌ join
 * ❌ min, max, avarage, sum - only for numbers
+* ❌ reduce (Aggregate)
+* ❌ README.md
+* ❌ Docs v1
+* -- v2
+
+* ❌ zip
+* ❌ join
 * ❌ orderBy, orderByDesc, thenBy, thenByDesc

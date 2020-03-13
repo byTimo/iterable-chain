@@ -1,9 +1,9 @@
-import {defaultComparer, KeyValue, selfSelector} from "./common";
+import { defaultComparer, KeyValue, selfSelector, IterableItem } from "./common";
 
 export function* objectGenerator<TKey extends string | number | symbol, TValue>(obj: Record<TKey, TValue>): Generator<KeyValue<string, TValue>> {
     for (const key in obj) {
         if (obj.hasOwnProperty(key)) {
-            yield {key, value: obj[key]};
+            yield { key, value: obj[key] };
         }
     }
 }
@@ -150,15 +150,25 @@ export function groupComparedByGenerator<T, TKey, TValue = T>(
     valueSelector?: (item: T) => TValue) {
     keyComparer = keyComparer || defaultComparer;
     valueSelector = valueSelector || selfSelector;
-    const result: Array<{ key: TKey, value: TValue[] }> = [];
+    const result: KeyValue<TKey, TValue[]>[] = [];
     for (const item of source) {
         const key = keySelector(item);
         let pair = result.find(x => keyComparer!(x.key, key));
         if (pair == null) {
-            pair = {key, value: []};
+            pair = { key, value: [] };
             result.push(pair);
         }
         pair.value.push(valueSelector(item));
     }
     return result;
+}
+
+export function* flatMapGenerator<TItem, TCollection extends Iterable<TItem>, R>(source: Iterable<TCollection>, selector: (item: IterableItem<TCollection>, index: number) => R) {
+    let i = 0;
+    for (const iterable of source) {
+        for (const item of iterable) {
+            yield selector(item as IterableItem<TCollection>, i);
+            i++;
+        }
+    }
 }

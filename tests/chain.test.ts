@@ -228,6 +228,20 @@ describe("chain global", () => {
                 ]);
             });
         });
+        describe("flatMap", () => {
+            it("array of arrays", () => {
+                const actual = chain.flatMap([[1, 2, 3], [4, 5, 6]], x => x - 1).toArray();
+                expect(actual).toEqual([0, 1, 2, 3, 4, 5]);
+            });
+            it("array of sets", () => {
+                const actual = chain.flatMap([new Set([1, 2, 3]), new Set([4, 5, 6])], x => x - 1).toArray();
+                expect(actual).toEqual([0, 1, 2, 3, 4, 5]);
+            });
+            it("set of arrays", () => {
+                const actual = chain.flatMap(new Set([[1, 2, 3], [4, 5, 6]]), x => x - 1).toArray();
+                expect(actual).toEqual([0, 1, 2, 3, 4, 5]);
+            });
+        })
     });
 
     describe("functions", () => {

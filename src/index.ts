@@ -15,7 +15,8 @@ import {
     reverseGenerator,
     skipGenerator,
     takeGenerator,
-    unionGenerator
+    unionGenerator,
+    flatMapGenerator
 } from "./generators";
 import {
     contains,
@@ -29,6 +30,7 @@ import {
     singleOrDefault,
     some
 } from "./functions";
+import {IterableItem} from "./common";
 
 export const chain = (function () {
     const create = function <T>(source: Iterable<T>) {
@@ -80,6 +82,9 @@ export const chain = (function () {
     create.groupComparedBy = function <T, TKey, TValue = T>(source: Iterable<T>, keySelector: (item: T) => TKey, keyComparer?: (a: TKey, b: TKey) => boolean, valueSelector?: (item: T) => TValue) {
         return new ChainIterable(groupComparedByGenerator(source, keySelector, keyComparer, valueSelector));
     };
+    create.flatMap = function <T, TCollection extends Iterable<T>, R>(source: Iterable<TCollection>, selector: (item: IterableItem<TCollection>, index: number) => R): ChainIterable<R> {
+        return new ChainIterable(flatMapGenerator(source, selector));
+    }
     create.some = some;
     create.every = every;
     create.count = count;

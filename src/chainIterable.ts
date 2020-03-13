@@ -1,5 +1,47 @@
-import {chain} from ".";
-import {selfSelector} from "./common";
+import { chain } from ".";
+import { selfSelector, IterableItem, KeyValue } from "./common";
+
+
+interface A<T> extends Iterable<T> {
+    toArray: () => T[];
+    toObject: <TKey extends string | number | symbol, TValue = T>(keySelector: (item: T) => TKey, valueSelector?: (item: T) => TValue) => Record<TKey, TValue>;
+    toMap: <TKey extends string | number | symbol, TValue = T>(keySelector: (item: T) => TKey, valueSelector?: (item: T) => TValue) => Map<TKey, TValue>;
+    toSet: () => Set<T>;
+    map: <R>(selector: (item: T, index: number) => R) => Q<R>;
+    filter: FilterOverride<T>;
+    some: (condition?: (item: T, index: number) => boolean) => boolean;
+    every: (condition?: (item: T, index: number) => boolean) => boolean;
+    append: (element: T) => Q<T>;
+    prepend: (element: T) => Q<T>;
+    concat: <S>(other: Iterable<S>) => Q<T | S>;
+    count: (condition?: (item: T, index: number) => boolean) => number;
+    contains: (element: T, comparer?: (a: T, b: T) => boolean) => boolean;
+    first: (condition?: (item: T, index: number) => boolean) => T;
+    firstOreDefault: (defaultValue: T, condition?: (item: T, index: number) => boolean) => T;
+    single: (condition?: (item: T, index: number) => boolean) => T;
+    singleOrDefault: (defaultValue: T, condition?: (item: T, index: number) => boolean) => T;
+    last: (condition?: (item: T, index: number) => boolean) => T;
+    lastOrDefault: (defaultValue: T, condition?: (item: T, index: number) => boolean) => T;
+    skip: (count: number) => Q<T>;
+    take: (count: number) => Q<T>;
+    reverse: () => Q<T>;
+    distinct: (stringifier?: (item: T) => string) => Q<T>;
+    except: (other: Iterable<T>, stringifier?: (item: T) => string) => Q<T>;
+    intersect: (other: Iterable<T>, stringifier?: (item: T) => string) => Q<T>;
+    union: (other: Iterable<T>, stringifier?: (item: T) => string) => Q<T>;
+    groupBy: <TKey extends string | number | symbol, TValue = T>(keySelector: (item: T) => TKey, valueSelector?: (item: T) => TValue) => Q<KeyValue<TKey, TValue[]>>;
+    groupComparedBy: <TKey, TValue = T>(keySelector: (item: T) => TKey, keyComparer?: (a: TKey, b: TKey) => boolean, valueSelector?: (item: T) => TValue) => Q<KeyValue<TKey, TValue[]>>;
+}
+
+interface B<T, TCollection extends Iterable<T>> extends Iterable<TCollection> {
+    flatMap: <R>(selector: (item: IterableItem<TCollection>, index: number) => R) => Q<R>;
+}
+
+type Q<T> = T extends Iterable<infer R> ? A<T> & B<R, T> : A<T>;
+
+function create<T>(source: Iterable<T>): Q<T> {
+}
+
 
 interface FilterOverride<T> {
     <S extends T>(condition: (item: T, index: number) => item is S): ChainIterable<S>
@@ -144,4 +186,13 @@ export class ChainIterable<T> implements Iterable<T> {
     groupComparedBy = <TKey, TValue = T>(keySelector: (item: T) => TKey, keyComparer?: (a: TKey, b: TKey) => boolean, valueSelector?: (item: T) => TValue) => {
         return chain.groupComparedBy(this.source, keySelector, keyComparer, valueSelector);
     };
+}
+
+export class CollectionChainIterable<T, TCollection extends Iterable<T>> {
+    constructor(private source: Iterable<TCollection>) {
+    }
+
+    flatMap = <R>(selector: (item: IterableItem<TCollection>, index: number) => R): ChainIterable<R> => {
+        return chain.flatMap(this.source, selector);
+    }
 }
