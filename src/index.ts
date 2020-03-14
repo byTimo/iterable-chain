@@ -1,4 +1,4 @@
-import {ChainIterable} from "./chainIterable";
+import { ChainIterable, create } from "./chainIterable";
 import {
     appendGenerator,
     concatGenerator,
@@ -30,72 +30,72 @@ import {
     singleOrDefault,
     some
 } from "./functions";
-import {IterableItem} from "./common";
+import { IterableItem } from "./common";
 
 export const chain = (function () {
-    const create = function <T>(source: Iterable<T>) {
-        return new ChainIterable(source);
+    const func = function <T>(source: Iterable<T>) {
+        return create(source);
     };
-    create.range = function (start: number, count: number): ChainIterable<number> {
-        return new ChainIterable(rangeGenerator(start, count));
+    func.range = function (start: number, count: number): ChainIterable<number> {
+        return create(rangeGenerator(start, count));
     };
-    create.repeat = function <T>(value: T, count: number): ChainIterable<T> {
-        return new ChainIterable(repeatGenerator(value, count));
+    func.repeat = function <T>(value: T, count: number): ChainIterable<T> {
+        return create(repeatGenerator(value, count));
     };
-    create.map = function <T, R>(source: Iterable<T>, selector: (item: T, index: number) => R) {
-        return new ChainIterable(mapGenerator(source, selector));
+    func.map = function <T, R>(source: Iterable<T>, selector: (item: T, index: number) => R) {
+        return create(mapGenerator(source, selector));
     };
-    create.filter = filter;
-    create.append = function <T>(source: Iterable<T>, element: T) {
-        return new ChainIterable(appendGenerator(source, element));
+    func.filter = filter;
+    func.append = function <T>(source: Iterable<T>, element: T) {
+        return create(appendGenerator(source, element));
     };
-    create.prepend = function <T>(source: Iterable<T>, element: T) {
-        return new ChainIterable(prependGenerator(source, element));
+    func.prepend = function <T>(source: Iterable<T>, element: T) {
+        return create(prependGenerator(source, element));
     };
-    create.concat = function <T, S>(source: Iterable<T>, other: Iterable<S>) {
-        return new ChainIterable(concatGenerator(source, other));
+    func.concat = function <T, S>(source: Iterable<T>, other: Iterable<S>) {
+        return create(concatGenerator(source, other));
     };
-    create.skip = function <T>(source: Iterable<T>, count: number): ChainIterable<T> {
-        return new ChainIterable(skipGenerator(source, count));
+    func.skip = function <T>(source: Iterable<T>, count: number): ChainIterable<T> {
+        return create(skipGenerator(source, count));
     };
-    create.take = function <T>(source: Iterable<T>, count: number): ChainIterable<T> {
-        return new ChainIterable(takeGenerator(source, count));
+    func.take = function <T>(source: Iterable<T>, count: number): ChainIterable<T> {
+        return create(takeGenerator(source, count));
     };
-    create.reverse = function <T>(source: Iterable<T>): ChainIterable<T> {
-        return new ChainIterable(reverseGenerator(source));
+    func.reverse = function <T>(source: Iterable<T>): ChainIterable<T> {
+        return create(reverseGenerator(source));
     };
-    create.distinct = function <T>(source: Iterable<T>, stringifier?: (item: T) => string): ChainIterable<T> {
-        return new ChainIterable(distinctGenerator(source, stringifier));
+    func.distinct = function <T>(source: Iterable<T>, stringifier?: (item: T) => string): ChainIterable<T> {
+        return create(distinctGenerator(source, stringifier));
     };
-    create.except = function <T>(first: Iterable<T>, second: Iterable<T>, stringifier?: (item: T) => string): ChainIterable<T> {
-        return new ChainIterable(exceptGenerator(first, second, stringifier));
+    func.except = function <T>(first: Iterable<T>, second: Iterable<T>, stringifier?: (item: T) => string): ChainIterable<T> {
+        return create(exceptGenerator(first, second, stringifier));
     };
-    create.intersect = function <T>(first: Iterable<T>, second: Iterable<T>, stringifier?: (item: T) => string): ChainIterable<T> {
-        return new ChainIterable(intersectGenerator(first, second, stringifier));
+    func.intersect = function <T>(first: Iterable<T>, second: Iterable<T>, stringifier?: (item: T) => string): ChainIterable<T> {
+        return create(intersectGenerator(first, second, stringifier));
     };
-    create.union = function <T>(first: Iterable<T>, second: Iterable<T>, stringifier?: (item: T) => string): ChainIterable<T> {
-        return new ChainIterable(unionGenerator(first, second, stringifier));
+    func.union = function <T>(first: Iterable<T>, second: Iterable<T>, stringifier?: (item: T) => string): ChainIterable<T> {
+        return create(unionGenerator(first, second, stringifier));
     };
-    create.groupBy = function <T, TKey extends string | number | symbol, TValue = T>(source: Iterable<T>, keySelector: (item: T) => TKey, valueSelector?: (item: T) => TValue) {
-        return new ChainIterable(groupByGenerator(source, keySelector, valueSelector));
+    func.groupBy = function <T, TKey extends string | number | symbol, TValue = T>(source: Iterable<T>, keySelector: (item: T) => TKey, valueSelector?: (item: T) => TValue) {
+        return create(groupByGenerator(source, keySelector, valueSelector));
     };
-    create.groupComparedBy = function <T, TKey, TValue = T>(source: Iterable<T>, keySelector: (item: T) => TKey, keyComparer?: (a: TKey, b: TKey) => boolean, valueSelector?: (item: T) => TValue) {
-        return new ChainIterable(groupComparedByGenerator(source, keySelector, keyComparer, valueSelector));
+    func.groupComparedBy = function <T, TKey, TValue = T>(source: Iterable<T>, keySelector: (item: T) => TKey, keyComparer?: (a: TKey, b: TKey) => boolean, valueSelector?: (item: T) => TValue) {
+        return create(groupComparedByGenerator(source, keySelector, keyComparer, valueSelector));
     };
-    create.flatMap = function <T, TCollection extends Iterable<T>, R>(source: Iterable<TCollection>, selector: (item: IterableItem<TCollection>, index: number) => R): ChainIterable<R> {
-        return new ChainIterable(flatMapGenerator(source, selector));
+    func.flatMap = function <T, TCollection extends Iterable<T>, R>(source: Iterable<TCollection>, selector: (item: IterableItem<TCollection>, index: number) => R): ChainIterable<R> {
+        return create(flatMapGenerator(source, selector));
     }
-    create.some = some;
-    create.every = every;
-    create.count = count;
-    create.contains = contains;
-    create.first = first;
-    create.firstOrDefault = firstOrDefault;
-    create.single = single;
-    create.singleOrDefault = singleOrDefault;
-    create.last = last;
-    create.lastOrDefault = lastOrDefault;
-    return create;
+    func.some = some;
+    func.every = every;
+    func.count = count;
+    func.contains = contains;
+    func.first = first;
+    func.firstOrDefault = firstOrDefault;
+    func.single = single;
+    func.singleOrDefault = singleOrDefault;
+    func.last = last;
+    func.lastOrDefault = lastOrDefault;
+    return func;
 })();
 
 export type Chain = typeof chain;
@@ -103,5 +103,5 @@ export type Chain = typeof chain;
 function filter<T, S extends T>(source: Iterable<T>, condition: (item: T, index: number) => item is S): ChainIterable<S>
 function filter<T>(source: Iterable<T>, condition: (item: T, index: number) => boolean): ChainIterable<T>
 function filter<T>(source: Iterable<T>, condition: (item: T, index: number) => boolean) {
-    return new ChainIterable(filterGenerator(source, condition));
+    return create(filterGenerator(source, condition));
 }

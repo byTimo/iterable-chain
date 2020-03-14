@@ -1,6 +1,6 @@
 import { defaultComparer, KeyValue, selfSelector, IterableItem } from "./common";
 
-export function* objectGenerator<TKey extends string | number | symbol, TValue>(obj: Record<TKey, TValue>): Generator<KeyValue<string, TValue>> {
+export function* objectGenerator<TKey extends string | number | symbol, TValue>(obj: Record<TKey, TValue>): Generator<KeyValue<TKey, TValue>> {
     for (const key in obj) {
         if (obj.hasOwnProperty(key)) {
             yield { key, value: obj[key] };

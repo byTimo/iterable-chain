@@ -1,4 +1,30 @@
-import {defaultComparer, defaultCondition, defaultConditionByElement, marker} from "./common";
+import {defaultComparer, defaultCondition, defaultConditionByElement, marker, selfSelector} from "./common";
+
+export function toObject<T, TKey extends string | number | symbol, TValue = T>(source: Iterable<T>, keySelector: (item: T) => TKey, valueSelector?: (item: T) => TValue): Record<TKey, TValue> {
+    valueSelector = valueSelector || selfSelector;
+    const result: Record<TKey, TValue> = {} as any;
+    for (const item of source) {
+        const key = keySelector(item);
+        if (key in result) {
+            throw new Error("Duplicate key: " + key);
+        }
+        result[key] = valueSelector(item);
+    }
+    return result;
+};
+
+export function toMap<T, TKey extends string | number | symbol, TValue = T>(source: Iterable<T>, keySelector: (item: T) => TKey, valueSelector?: (item: T) => TValue): Map<TKey, TValue> {
+    valueSelector = valueSelector || selfSelector;
+    const map: Map<TKey, TValue> = new Map();
+    for (const item of source) {
+        const key = keySelector(item);
+        if (map.has(key)) {
+            throw new Error("Duplicate key: " + key);
+        }
+        map.set(key, valueSelector(item));
+    }
+    return map;
+};
 
 export function some<T>(source: Iterable<T>, condition?: (item: T, index: number) => boolean): boolean {
     let i = 0;

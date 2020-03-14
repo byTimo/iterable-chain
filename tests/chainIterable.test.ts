@@ -1,5 +1,5 @@
-import {ChainIterable} from "../src/chainIterable";
-import {chain} from "../src";
+import { ChainIterable, create } from "../src/chainIterable";
+import { chain } from "../src";
 
 function isNumber(a: number | string): a is number {
     return typeof a === "number";
@@ -8,43 +8,43 @@ function isNumber(a: number | string): a is number {
 describe("chain iterable", () => {
     describe("convert", () => {
         it("to array", () => {
-            const actual = new ChainIterable([1, 2, 3, 4]).toArray();
+            const actual = create([1, 2, 3, 4]).toArray();
             expect(actual).toEqual([1, 2, 3, 4]);
         });
         it("to object without value selector", () => {
-            const actual = new ChainIterable([{a: 1}, {a: 2}, {a: 3}]).toObject(x => x.a);
-            expect(actual).toEqual({1: {a: 1}, 2: {a: 2}, 3: {a: 3}});
+            const actual = create([{ a: 1 }, { a: 2 }, { a: 3 }]).toObject(x => x.a);
+            expect(actual).toEqual({ 1: { a: 1 }, 2: { a: 2 }, 3: { a: 3 } });
         });
         it("to object with value selector", () => {
-            const actual = new ChainIterable([{a: 1}, {a: 2}, {a: 3}]).toObject(x => x.a, x => x.a);
-            expect(actual).toEqual({1: 1, 2: 2, 3: 3});
+            const actual = create([{ a: 1 }, { a: 2 }, { a: 3 }]).toObject(x => x.a, x => x.a);
+            expect(actual).toEqual({ 1: 1, 2: 2, 3: 3 });
         });
         it("to object with duplicate key - throw error", () => {
             expect(() => {
-                new ChainIterable([1, 2, 3, 4]).toObject(x => x % 2);
+                create([1, 2, 3, 4]).toObject(x => x % 2);
             }).toThrow();
         });
         it("to Set", () => {
-            const actual = new ChainIterable([1, 2, 2, 4, 5]).toSet();
+            const actual = create([1, 2, 2, 4, 5]).toSet();
             expect(actual).toEqual(new Set([1, 2, 4, 5]));
         });
         it("to Map without value selector", () => {
-            const actual = new ChainIterable([{a: 1}, {a: 2}, {a: 3}]).toMap(x => x.a);
-            expect(actual).toEqual(new Map([[1, {a: 1}], [2, {a: 2}], [3, {a: 3}]]));
+            const actual = create([{ a: 1 }, { a: 2 }, { a: 3 }]).toMap(x => x.a);
+            expect(actual).toEqual(new Map([[1, { a: 1 }], [2, { a: 2 }], [3, { a: 3 }]]));
         });
         it("to Map with value selector", () => {
-            const actual = new ChainIterable([{a: 1}, {a: 2}, {a: 3}]).toMap(x => x.a, x => x.a);
+            const actual = create([{ a: 1 }, { a: 2 }, { a: 3 }]).toMap(x => x.a, x => x.a);
             expect(actual).toEqual(new Map([[1, 1], [2, 2], [3, 3]]));
         });
         it("to Map with duplicate key - throw error", () => {
             expect(() => {
-                new ChainIterable([1, 2, 3, 4]).toMap(x => x % 2);
+                create([1, 2, 3, 4]).toMap(x => x % 2);
             }).toThrow();
         });
     });
     describe("can use as Iterable", () => {
         it("from constructor", () => {
-            const iterable = new ChainIterable([1, 2, 3, 4, 5]);
+            const iterable = create([1, 2, 3, 4, 5]);
             const actual = chain.filter(iterable, x => x === 5);
             expect(actual[Symbol.iterator]().next().value).toEqual(5);
         });
@@ -64,14 +64,14 @@ describe("chain iterable", () => {
             expect(actual).toEqual([1, 2]);
         });
         it("map after filter", () => {
-            const actual = chain([1, 2, 3, 4, 5])
+            const actual = create([1, 2, 3, 4, 5])
                 .filter(x => x % 2 == 0)
                 .map(x => x * 2)
                 .toArray();
             expect(actual).toEqual([4, 8]);
         });
         it("filter after map", () => {
-            const actual = chain([1, 2, 3, 4, 5])
+            const actual = create([1, 2, 3, 4, 5])
                 .map(x => x.toString())
                 .filter(x => x !== "1")
                 .toArray();
@@ -85,4 +85,10 @@ describe("chain iterable", () => {
             expect(actual).toEqual([6]);
         });
     });
+    describe("flatMap", () => {
+        it("map to collection collections and back", () => {
+            const actual = create([1, 2, 3]).map(x => [x]).flatMap(x => x).toArray()
+            expect(actual).toEqual([1, 2, 3]);
+        })
+    })
 });
