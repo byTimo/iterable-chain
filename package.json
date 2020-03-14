@@ -1,13 +1,19 @@
 {
   "name": "iterable-chain",
-  "version": "1.0.0",
+  "version": "2.0.0-alpha.0",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "repository": "git@github.com:byTimo/iterable-chain.git",
   "author": "byTimo <race.timo@gmail.com>",
   "license": "MIT",
   "description": "Library for working with collections using iterators.",
-  "keywords": ["iterator", "iterable", "enumerable", "collection", "method chaining"],
+  "keywords": [
+    "iterator",
+    "iterable",
+    "enumerable",
+    "collection",
+    "method chaining"
+  ],
   "devDependencies": {
     "@types/jest": "^25.1.2",
     "@types/node": "^13.7.1",
@@ -19,5 +25,7 @@
     "build": "tsc",
     "test": "jest"
   },
-  "files": ["lib/**/*"]
+  "files": [
+    "lib/**/*"
+  ]
 }
