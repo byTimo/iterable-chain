@@ -23,7 +23,9 @@
   },
   "scripts": {
     "build": "tsc",
-    "test": "jest"
+    "test": "jest",
+    "preversion": "yarn test",
+    "prepublish": "yarn build"
   },
   "files": [
     "lib/**/*"
