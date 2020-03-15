@@ -1,4 +1,4 @@
-import { defaultComparer, KeyValue, selfSelector, IterableItem } from "./common";
+import { defaultComparer, KeyValue, selfSelector } from "./common";
 
 export function* objectGenerator<TKey extends string | number | symbol, TValue>(obj: Record<TKey, TValue>): Generator<KeyValue<TKey, TValue>> {
     for (const key in obj) {
@@ -163,12 +163,13 @@ export function groupComparedByGenerator<T, TKey, TValue = T>(
     return result;
 }
 
-export function* flatMapGenerator<TItem, TCollection extends Iterable<TItem>, R>(source: Iterable<TCollection>, selector: (item: IterableItem<TCollection>, index: number) => R) {
+export function* flatMapGenerator<T, R>(source: Iterable<T>, selector: (item: T, index: number) => Iterable<R>) {
     let i = 0;
-    for (const iterable of source) {
-        for (const item of iterable) {
-            yield selector(item as IterableItem<TCollection>, i);
-            i++;
+    for (const item of source) {
+        const selected = selector(item, i);
+        for (const selectedItem of selected) {
+            yield selectedItem;
         }
+        i++;
     }
 }

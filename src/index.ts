@@ -30,7 +30,6 @@ import {
     singleOrDefault,
     some
 } from "./functions";
-import { IterableItem } from "./common";
 
 export const chain = (function () {
     const func = function <T>(source: Iterable<T>) {
@@ -82,7 +81,7 @@ export const chain = (function () {
     func.groupComparedBy = function <T, TKey, TValue = T>(source: Iterable<T>, keySelector: (item: T) => TKey, keyComparer?: (a: TKey, b: TKey) => boolean, valueSelector?: (item: T) => TValue) {
         return create(groupComparedByGenerator(source, keySelector, keyComparer, valueSelector));
     };
-    func.flatMap = function <T, TCollection extends Iterable<T>, R>(source: Iterable<TCollection>, selector: (item: IterableItem<TCollection>, index: number) => R): ChainIterable<R> {
+    func.flatMap = function <T, R>(source: Iterable<T>, selector: (item: T, index: number) => Iterable<R>): ChainIterable<R> {
         return create(flatMapGenerator(source, selector));
     }
     func.some = some;

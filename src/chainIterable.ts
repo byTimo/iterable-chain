@@ -1,4 +1,4 @@
-import { IterableItem, KeyValue } from "./common";
+import { KeyValue } from "./common";
 import { mapGenerator, filterGenerator, appendGenerator, concatGenerator, prependGenerator, skipGenerator, takeGenerator, distinctGenerator, exceptGenerator, intersectGenerator, unionGenerator, groupByGenerator, groupComparedByGenerator, reverseGenerator, flatMapGenerator } from "./generators";
 import { contains, count, some, every, first, firstOrDefault, single, singleOrDefault, last, lastOrDefault, toObject, toMap } from "./functions";
 
@@ -31,11 +31,7 @@ export interface ChainIterable<T> extends Iterable<T> {
     union: (other: Iterable<T>, stringifier?: (item: T) => string) => ChainIterable<T>;
     groupBy: <TKey extends string | number | symbol, TValue = T>(keySelector: (item: T) => TKey, valueSelector?: (item: T) => TValue) => ChainIterable<KeyValue<TKey, TValue[]>>;
     groupComparedBy: <TKey, TValue = T>(keySelector: (item: T) => TKey, keyComparer?: (a: TKey, b: TKey) => boolean, valueSelector?: (item: T) => TValue) => ChainIterable<KeyValue<TKey, TValue[]>>;
-    flatMap: T extends Iterable<infer R> ? <X>(selector: (item: R, index: number) => X) => ChainIterable<X> : never;
-}
-
-interface CollectionChainIterable<T> extends Iterable<T> {
-    flatMap: <R>(selector: (item: T, index: number) => R) => ChainIterable<R>;
+    flatMap: <R>(selector: (item: T, index: number) => Iterable<R>) => ChainIterable<R>;
 }
 
 interface FilterOverride<T> {
@@ -45,7 +41,7 @@ interface FilterOverride<T> {
 }
 
 export function create<T>(source: Iterable<T>): ChainIterable<T> {
-    const iter: Omit<ChainIterable<T>, keyof CollectionChainIterable<T>> & CollectionChainIterable<T> = {
+    const iter: ChainIterable<T> = {
         map: (selector) => create(mapGenerator(source, selector)),
         filter: (condition: any) => create(filterGenerator(source, condition)),
         append: (element) => create(appendGenerator(source, element)),
@@ -74,7 +70,7 @@ export function create<T>(source: Iterable<T>): ChainIterable<T> {
         toSet: () => new Set(source),
         toObject: (keySelector, valueSelector) => toObject(source, keySelector, valueSelector),
         toMap: (keySelector, valueSelector) => toMap(source, keySelector, valueSelector),
-        flatMap: (selector) => create(flatMapGenerator(source as any as Iterable<Iterable<T>>, selector)),
+        flatMap: (selector) => create(flatMapGenerator(source, selector)),
         [Symbol.iterator]: () => source[Symbol.iterator]()
     };
 
