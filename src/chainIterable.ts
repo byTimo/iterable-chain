@@ -1,6 +1,6 @@
 import { KeyValue } from "./common";
 import { mapGenerator, filterGenerator, appendGenerator, concatGenerator, prependGenerator, skipGenerator, takeGenerator, distinctGenerator, exceptGenerator, intersectGenerator, unionGenerator, groupByGenerator, groupComparedByGenerator, reverseGenerator, flatMapGenerator } from "./generators";
-import { contains, count, some, every, first, firstOrDefault, single, singleOrDefault, last, lastOrDefault, toObject, toMap } from "./functions";
+import { contains, count, some, every, first, firstOrDefault, single, singleOrDefault, last, lastOrDefault, toObject, toMap, reduce } from "./functions";
 
 export interface ChainIterable<T> extends Iterable<T> {
     toArray: () => T[];
@@ -32,6 +32,7 @@ export interface ChainIterable<T> extends Iterable<T> {
     groupBy: <TKey extends string | number | symbol, TValue = T>(keySelector: (item: T) => TKey, valueSelector?: (item: T) => TValue) => ChainIterable<KeyValue<TKey, TValue[]>>;
     groupComparedBy: <TKey, TValue = T>(keySelector: (item: T) => TKey, keyComparer?: (a: TKey, b: TKey) => boolean, valueSelector?: (item: T) => TValue) => ChainIterable<KeyValue<TKey, TValue[]>>;
     flatMap: <R>(selector: (item: T, index: number) => Iterable<R>) => ChainIterable<R>;
+    reduce: <U = T>(callback: (prev: U, cur: T, index: number) => U, initial?: U) => U;
 }
 
 interface FilterOverride<T> {
@@ -71,6 +72,7 @@ export function create<T>(source: Iterable<T>): ChainIterable<T> {
         toObject: (keySelector, valueSelector) => toObject(source, keySelector, valueSelector),
         toMap: (keySelector, valueSelector) => toMap(source, keySelector, valueSelector),
         flatMap: (selector) => create(flatMapGenerator(source, selector)),
+        reduce: (callback, initial) => reduce(source, callback, initial),
         [Symbol.iterator]: () => source[Symbol.iterator]()
     };
 

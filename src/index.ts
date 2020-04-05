@@ -28,7 +28,8 @@ import {
     lastOrDefault,
     single,
     singleOrDefault,
-    some
+    some,
+    reduce
 } from "./functions";
 
 export const chain = (function () {
@@ -94,6 +95,7 @@ export const chain = (function () {
     func.singleOrDefault = singleOrDefault;
     func.last = last;
     func.lastOrDefault = lastOrDefault;
+    func.reduce = reduce;
     return func;
 })();
 

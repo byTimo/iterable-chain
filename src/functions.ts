@@ -1,4 +1,4 @@
-import {defaultComparer, defaultCondition, defaultConditionByElement, marker, selfSelector} from "./common";
+import { defaultComparer, defaultCondition, defaultConditionByElement, marker, selfSelector } from "./common";
 
 export function toObject<T, TKey extends string | number | symbol, TValue = T>(source: Iterable<T>, keySelector: (item: T) => TKey, valueSelector?: (item: T) => TValue): Record<TKey, TValue> {
     valueSelector = valueSelector || selfSelector;
@@ -139,4 +139,25 @@ export function last<T>(source: Iterable<T>, condition?: (item: T, index: number
         throw new Error("TODO");
     }
     return result;
+}
+
+export function reduce<T, U = T>(source: Iterable<T>, callback: (prev: U, cur: T, index: number) => U, initial?: U): U {
+    const iterator = source[Symbol.iterator]();
+    let index = 0;
+    let resutl: U = initial!;
+    let next = iterator.next();
+    if (arguments.length === 2) {
+        if (next.done) {
+            throw new Error("TODO");
+        }
+        resutl = next.value as any as U;
+        index++;
+        next = iterator.next();
+    }
+    while (!next.done) {
+        resutl = callback(resutl, next.value, index);
+        index++;
+        next = iterator.next();
+    }
+    return resutl;
 }

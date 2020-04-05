@@ -18,9 +18,9 @@
 
 -- release
 
-* ❌ flatMap (SelectMany)
+* ✅ flatMap (SelectMany)
 * ❌ min, max, avarage, sum - only for numbers
-* ❌ reduce (Aggregate)
+* ✅ reduce (Aggregate)
 * ❌ README.md
 * ❌ Docs v1
 * -- v2

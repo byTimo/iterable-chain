@@ -413,5 +413,36 @@ describe("chain global", () => {
                 expect(actual).toBe(3);
             });
         });
+        describe("reduce", () => {
+            describe("without initial value", () => {
+                it("empty collection", () => {
+                    expect(() => {
+                        chain.reduce([], p => p);
+                    }).toThrow();
+                });
+                it("collection with one element", () => {
+                    const actual = chain.reduce([1], (p, c, i) => p + c + i + 1);
+                    expect(actual).toBe(1);
+                });
+                it("collection with several elements", () => {
+                    const actual = chain.reduce(["1", "2", "3"], (p, c) => p + c);
+                    expect(actual).toBe("123");
+                });
+            });
+            describe("with initial value", () => {
+                it("empty collcetion", () => {
+                    const actual = chain.reduce([], p => p, 0);
+                    expect(actual).toBe(0);
+                });
+                it("collection with one element", () => {
+                    const actual = chain.reduce([1], (p, c, i) => p + c + i + 1, 15);
+                    expect(actual).toBe(17);
+                });
+                it("collection with several elements", () => {
+                    const actual = chain.reduce(["1", "2", "3"], (p, c) => p + parseInt(c), 100);
+                    expect(actual).toBe(106);
+                });
+            });
+        })
     });
 });
