@@ -1,6 +1,6 @@
 import { KeyValue } from "./common";
 import { mapGenerator, filterGenerator, appendGenerator, concatGenerator, prependGenerator, skipGenerator, takeGenerator, distinctGenerator, exceptGenerator, intersectGenerator, unionGenerator, groupByGenerator, groupComparedByGenerator, reverseGenerator, flatMapGenerator } from "./generators";
-import { contains, count, some, every, first, firstOrDefault, single, singleOrDefault, last, lastOrDefault, toObject, toMap, reduce } from "./functions";
+import { contains, count, some, every, first, firstOrDefault, single, singleOrDefault, last, lastOrDefault, toObject, toMap, reduce, max, min, sum } from "./functions";
 
 export interface ChainIterable<T> extends Iterable<T> {
     toArray: () => T[];
@@ -33,6 +33,15 @@ export interface ChainIterable<T> extends Iterable<T> {
     groupComparedBy: <TKey, TValue = T>(keySelector: (item: T) => TKey, keyComparer?: (a: TKey, b: TKey) => boolean, valueSelector?: (item: T) => TValue) => ChainIterable<KeyValue<TKey, TValue[]>>;
     flatMap: <R>(selector: (item: T, index: number) => Iterable<R>) => ChainIterable<R>;
     reduce: <U = T>(callback: (prev: U, cur: T, index: number) => U, initial?: U) => U;
+    min: T extends number ? () => number : never;
+    max: T extends number ? () => number : never;
+    sum: T extends number ? () => number : never;
+}
+
+interface NumberChainIterable {
+    min: () => number;
+    max: () => number;
+    sum: () => number;
 }
 
 interface FilterOverride<T> {
@@ -42,7 +51,7 @@ interface FilterOverride<T> {
 }
 
 export function create<T>(source: Iterable<T>): ChainIterable<T> {
-    const iter: ChainIterable<T> = {
+    const iter: Omit<ChainIterable<T>, keyof NumberChainIterable> & NumberChainIterable & Iterable<T> = {
         map: (selector) => create(mapGenerator(source, selector)),
         filter: (condition: any) => create(filterGenerator(source, condition)),
         append: (element) => create(appendGenerator(source, element)),
@@ -73,6 +82,9 @@ export function create<T>(source: Iterable<T>): ChainIterable<T> {
         toMap: (keySelector, valueSelector) => toMap(source, keySelector, valueSelector),
         flatMap: (selector) => create(flatMapGenerator(source, selector)),
         reduce: (callback, initial) => reduce(source, callback, initial),
+        max: () => max(source as any),
+        min: () => min(source as any),
+        sum: () => sum(source as any),
         [Symbol.iterator]: () => source[Symbol.iterator]()
     };
 

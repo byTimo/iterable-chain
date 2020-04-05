@@ -19,8 +19,10 @@
 -- release
 
 * ✅ flatMap (SelectMany)
-* ❌ min, max, avarage, sum - only for numbers
+* ✅ min, max, sum - only for numbers
 * ✅ reduce (Aggregate)
+* ❌ chain from object
+* ❌ refactor tests (spilt and fill)
 * ❌ README.md
 * ❌ Docs v1
 * -- v2

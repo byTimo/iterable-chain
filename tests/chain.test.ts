@@ -443,6 +443,36 @@ describe("chain global", () => {
                     expect(actual).toBe(106);
                 });
             });
-        })
+        });
+        describe("min", () => {
+            it("empty collection", () => {
+                const actual = chain.min([]);
+                expect(actual).toBe(Number.POSITIVE_INFINITY);
+            });
+            it("collection with items", () => {
+                const actual = chain.min([-1, 0, 15, -9]);
+                expect(actual).toBe(-9);
+            });
+        });
+        describe("max", () => {
+            it("empty collection", () => {
+                const actual = chain.max([]);
+                expect(actual).toBe(Number.NEGATIVE_INFINITY);
+            });
+            it("collection with items", () => {
+                const actual = chain.max([-1, 0, 15, -9]);
+                expect(actual).toBe(15);
+            });
+        });
+        describe("sum", () => {
+            it("empty collection", () => {
+                const actual = chain.sum([]);
+                expect(actual).toBe(0);
+            });
+            it("collection with items", () => {
+                const actual = chain.sum([-1, 0, 15, -9]);
+                expect(actual).toBe(5);
+            });
+        });
     });
 });

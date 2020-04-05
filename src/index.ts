@@ -29,7 +29,10 @@ import {
     single,
     singleOrDefault,
     some,
-    reduce
+    reduce,
+    min,
+    max,
+    sum
 } from "./functions";
 
 export const chain = (function () {
@@ -96,6 +99,9 @@ export const chain = (function () {
     func.last = last;
     func.lastOrDefault = lastOrDefault;
     func.reduce = reduce;
+    func.min = min;
+    func.max = max;
+    func.sum = sum;
     return func;
 })();
 

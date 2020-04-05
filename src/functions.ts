@@ -161,3 +161,15 @@ export function reduce<T, U = T>(source: Iterable<T>, callback: (prev: U, cur: T
     }
     return resutl;
 }
+
+export function min(source: Iterable<number>): number {
+    return Math.min(...source);
+}
+
+export function max(source: Iterable<number>): number {
+    return Math.max(...source);
+}
+
+export function sum(source: Iterable<number>): number {
+    return reduce(source, (p, c) => p + c, 0);
+}
