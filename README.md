@@ -21,7 +21,7 @@
 * ✅ flatMap (SelectMany)
 * ✅ min, max, sum - only for numbers
 * ✅ reduce (Aggregate)
-* ❌ chain from object
+* ✅ chain from object
 * ❌ refactor tests (spilt and fill)
 * ❌ README.md
 * ❌ Docs v1

@@ -10,3 +10,7 @@ export interface KeyValue<TKey, TValue> {
     key: TKey;
     value: TValue;
 }
+
+export function isIterable<T>(source: any): source is Iterable<T> {
+    return Symbol.iterator in source;
+}

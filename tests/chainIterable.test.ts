@@ -48,6 +48,11 @@ describe("chain iterable", () => {
             const actual = chain.filter(iterable, x => x === 5);
             expect(actual[Symbol.iterator]().next().value).toEqual(5);
         });
+        it("from object", () => {
+            const obj = { a: 1, b: 2, c: 3 };
+            const actual = chain(obj).toArray();
+            expect(actual).toEqual([{ key: "a", value: 1 }, { key: "b", value: 2 }, { key: "c", value: 3 }]);
+        });
         it("from chain", () => {
             const iterable = chain([1, 2, 3, 4, 5]);
             const actual = chain.filter(iterable, x => x === 5);

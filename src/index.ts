@@ -16,7 +16,8 @@ import {
     skipGenerator,
     takeGenerator,
     unionGenerator,
-    flatMapGenerator
+    flatMapGenerator,
+    objectGenerator
 } from "./generators";
 import {
     contains,
@@ -34,11 +35,52 @@ import {
     max,
     sum
 } from "./functions";
+import { isIterable, KeyValue } from "./common";
 
-export const chain = (function () {
-    const func = function <T>(source: Iterable<T>) {
-        return create(source);
-    };
+export interface Chain {
+    <T>(source: Iterable<T>): ChainIterable<T>;
+    <TKey extends string | number | symbol, TValue>(source: Record<TKey, TValue>): ChainIterable<KeyValue<TKey, TValue>>;
+    range: (start: number, count: number) => ChainIterable<number>;
+    repeat: <T>(value: T, count: number) => ChainIterable<T>
+    map: <T, R>(source: Iterable<T>, selector: (item: T, index: number) => R) => ChainIterable<R>;
+    filter: typeof filter;
+    append: <T>(source: Iterable<T>, element: T) => ChainIterable<T>;
+    prepend: <T>(source: Iterable<T>, element: T) => ChainIterable<T>;
+    concat: <T, S>(source: Iterable<T>, other: Iterable<S>) => ChainIterable<T | S>;
+    skip: <T>(source: Iterable<T>, count: number) => ChainIterable<T>;
+    take: <T>(source: Iterable<T>, count: number) => ChainIterable<T>;
+    reverse: <T>(source: Iterable<T>) => ChainIterable<T>;
+    distinct: <T>(source: Iterable<T>, stringifier?: (item: T) => string) => ChainIterable<T>;
+    except: <T>(first: Iterable<T>, second: Iterable<T>, stringifier?: (item: T) => string) => ChainIterable<T>;
+    intersect: <T>(first: Iterable<T>, second: Iterable<T>, stringifier?: (item: T) => string) => ChainIterable<T>;
+    union: <T>(first: Iterable<T>, second: Iterable<T>, stringifier?: (item: T) => string) => ChainIterable<T>;
+    groupBy: <T, TKey extends string | number | symbol, TValue = T>(source: Iterable<T>, keySelector: (item: T) => TKey, valueSelector?: (item: T) => TValue) => ChainIterable<KeyValue<TKey, TValue[]>>;
+    groupComparedBy: <T, TKey, TValue = T>(source: Iterable<T>, keySelector: (item: T) => TKey, keyComparer?: (a: TKey, b: TKey) => boolean, valueSelector?: (item: T) => TValue) => ChainIterable<KeyValue<TKey, TValue[]>>;
+    flatMap: <T, R>(source: Iterable<T>, selector: (item: T, index: number) => Iterable<R>) => ChainIterable<R>;
+    some: typeof some;
+    every: typeof every;
+    count: typeof count;
+    contains: typeof contains;
+    first: typeof first;
+    firstOrDefault: typeof firstOrDefault;
+    single: typeof single;
+    singleOrDefault: typeof singleOrDefault;
+    last: typeof last;
+    lastOrDefault: typeof lastOrDefault;
+    reduce: typeof reduce;
+    min: typeof min;
+    max: typeof max;
+    sum: typeof sum;
+}
+
+export const chain: Chain = (function () {
+    const func: any = function (source: any) {
+        if (isIterable(source)) {
+            return create(source);
+        }
+        return create(objectGenerator(source));
+    }
+
     func.range = function (start: number, count: number): ChainIterable<number> {
         return create(rangeGenerator(start, count));
     };
@@ -104,8 +146,6 @@ export const chain = (function () {
     func.sum = sum;
     return func;
 })();
-
-export type Chain = typeof chain;
 
 function filter<T, S extends T>(source: Iterable<T>, condition: (item: T, index: number) => item is S): ChainIterable<S>
 function filter<T>(source: Iterable<T>, condition: (item: T, index: number) => boolean): ChainIterable<T>
