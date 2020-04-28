@@ -6,42 +6,6 @@ function isNumber(a: number | string): a is number {
 }
 
 describe("chain iterable", () => {
-    describe("convert", () => {
-        it("to array", () => {
-            const actual = create([1, 2, 3, 4]).toArray();
-            expect(actual).toEqual([1, 2, 3, 4]);
-        });
-        it("to object without value selector", () => {
-            const actual = create([{ a: 1 }, { a: 2 }, { a: 3 }]).toObject(x => x.a);
-            expect(actual).toEqual({ 1: { a: 1 }, 2: { a: 2 }, 3: { a: 3 } });
-        });
-        it("to object with value selector", () => {
-            const actual = create([{ a: 1 }, { a: 2 }, { a: 3 }]).toObject(x => x.a, x => x.a);
-            expect(actual).toEqual({ 1: 1, 2: 2, 3: 3 });
-        });
-        it("to object with duplicate key - throw error", () => {
-            expect(() => {
-                create([1, 2, 3, 4]).toObject(x => x % 2);
-            }).toThrow();
-        });
-        it("to Set", () => {
-            const actual = create([1, 2, 2, 4, 5]).toSet();
-            expect(actual).toEqual(new Set([1, 2, 4, 5]));
-        });
-        it("to Map without value selector", () => {
-            const actual = create([{ a: 1 }, { a: 2 }, { a: 3 }]).toMap(x => x.a);
-            expect(actual).toEqual(new Map([[1, { a: 1 }], [2, { a: 2 }], [3, { a: 3 }]]));
-        });
-        it("to Map with value selector", () => {
-            const actual = create([{ a: 1 }, { a: 2 }, { a: 3 }]).toMap(x => x.a, x => x.a);
-            expect(actual).toEqual(new Map([[1, 1], [2, 2], [3, 3]]));
-        });
-        it("to Map with duplicate key - throw error", () => {
-            expect(() => {
-                create([1, 2, 3, 4]).toMap(x => x % 2);
-            }).toThrow();
-        });
-    });
     describe("can use as Iterable", () => {
         it("from constructor", () => {
             const iterable = create([1, 2, 3, 4, 5]);

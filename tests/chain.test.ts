@@ -7,42 +7,7 @@ function isNumber(a: number | string): a is number {
 //TODO (byTimo) Set, Map, Record
 describe("chain global", () => {
     describe("generators", () => {
-        describe("range", () => {
-            it("start from zero", () => {
-                const actual = chain.range(0, 5).toArray();
-                expect(actual).toEqual([0, 1, 2, 3, 4]);
-            });
-            it("start from 5", () => {
-                const actual = chain.range(5, 5).toArray();
-                expect(actual).toEqual([5, 6, 7, 8, 9]);
-            });
-            it("count is zero", () => {
-                const actual = chain.range(5, 0).toArray();
-                expect(actual).toEqual([]);
-            });
-            it("count less then zero", () => {
-                const actual = chain.range(5, -1).toArray();
-                expect(actual).toEqual([]);
-            });
-        });
-        describe("repeat", () => {
-            it("repeat number", () => {
-                const actual = chain.repeat(10, 5).toArray();
-                expect(actual).toEqual([10, 10, 10, 10, 10]);
-            });
-            it("repeat object", () => {
-                const obj = { a: 10 };
-                const actual = chain.repeat(obj, 3).toArray();
-                expect(actual).toEqual([obj, obj, obj]);
-                expect(actual[0]).toBe(obj);
-                expect(actual[1]).toBe(obj);
-                expect(actual[2]).toBe(obj);
-            });
-        });
-        it("map", () => {
-            const actual = chain.map([1, 2, 3, 4], x => x + 50).toArray();
-            expect(actual).toEqual([51, 52, 53, 54]);
-        });
+        ;
         describe("filter", () => {
             it("array - condition return boolean", () => {
                 const actual = chain.filter([1, 2, 3, 4], x => x % 2 == 0).toArray();
