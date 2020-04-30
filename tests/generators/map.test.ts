@@ -20,5 +20,5 @@ describe("map", () => {
     it("object", () => {
         const actual = chain({a: 10, b: 20}).map(({key, value}) => `${key}${value}`).toArray();
         expect(actual).toEqual(["a10", "b20"]);
-    })
+    });
 })
