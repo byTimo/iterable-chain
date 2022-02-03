@@ -1,32 +1,19 @@
-import { chain } from "../../src";
+import {
+    buildTest,
+    simpleArray,
+    complexArray,
+    simpleMap,
+    simpleSet,
+    simpleObject,
+    objectStringifier,
+    keyStringifier
+} from "../common";
 
-describe("except", () => {
-    it("static - primitive", () => {
-        const actual = chain.except([1, 2, 3], [2, 3, 4]).toArray();
-        expect(actual).toEqual([1]);
-    });
-    it("static - objects without stringifier", () => {
-        const actual = chain.except([{ a: 10 }, { a: 15 }], [{ a: 15 }]).toArray();
-        expect(actual).toEqual([{ a: 10 }, { a: 15 }]);
-    });
-    it("static - objects with stringifer", () => {
-        const actual = chain.except([{ a: 10 }, { a: 15 }], [{ a: 15 }], x => x.a.toString()).toArray();
-        expect(actual).toEqual([{ a: 10 }]);
-    });
-    it("array", () => {
-        const actual = chain([1, 2, 3]).except([2]).toArray();
-        expect(actual).toEqual([1, 3]);
-    });
-    it("Map", () => {
-        const acutal = chain(new Map([["a", 1], ["b", 2]])).except([["a", 1]], ([key]) => key).toArray();
-        expect(acutal).toEqual([["b", 2]]);
-    });
-    it("Set", () => {
-        const acutal = chain(new Set([1, 2, 3])).except([1, 2]).toArray();
-        expect(acutal).toEqual([3]);
-    });
-    it("object", () => {
-        const actual = chain({ a: 10, b: 20 }).except([{ key: "a", value: 10 }], ({ key }) => key).toArray();
-        expect(actual).toEqual([{ key: "b", value: 20 }]);
-    });
-});
+buildTest("except")
+    .case("primitive", simpleArray, [1], [2, 3, 4])
+    .case("same objects without stringifier", complexArray, complexArray.slice(0, 1), complexArray.slice(1))
+    .case("objects without stringifier", complexArray, complexArray, [{ a: 10 }])
+    .case("objects with stringifier", complexArray, [{ a: 10 }], complexArray.slice(1), objectStringifier)
+    .case("map", simpleMap, [["b", 2]], [["a", 1], ["c", 1]], keyStringifier)
+    .case("set", simpleSet, [1], [2, 3, 4])
+    .object("object", simpleObject, [["a", 1]], [["b", 1], ["c", 1]], keyStringifier);

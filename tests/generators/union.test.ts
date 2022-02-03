@@ -1,32 +1,23 @@
-import { chain } from "../../src";
+import {
+    buildTest,
+    simpleArray,
+    complexArray,
+    keyStringifier,
+    objectStringifier,
+    simpleMap,
+    simpleSet,
+    simpleObject
+} from "../common";
 
-describe("union", () => {
-    it("static - primitives", () => {
-        const actual = chain.union([1, 2, 3], [2, 3, 4]).toArray();
-        expect(actual).toEqual([1, 2, 3, 4]);
-    });
-    it("static - objects without stringifier", () => {
-        const actual = chain.union([{ a: 10 }, { a: 15 }], [{ a: 15 }]).toArray();
-        expect(actual).toEqual([{ a: 10 }, { a: 15 }, { a: 15 }]);
-    });
-    it("statis - objects with stringifier", () => {
-        const actual = chain.union([{ a: 10 }, { a: 15 }], [{ a: 15 }], x => x.a.toString()).toArray();
-        expect(actual).toEqual([{ a: 10 }, { a: 15 }]);
-    });
-    it("array", () => {
-        const actual = chain([1, 2, 3]).union([2, 3, 4]).toArray();
-        expect(actual).toEqual([1, 2, 3, 4]);
-    });
-    it("Map", () => {
-        const acutal = chain(new Map([["a", 1], ["b", 2]])).union([["a", 1], ["c", 3]], ([key]) => key).toArray();
-        expect(acutal).toEqual([["a", 1], ["b", 2], ["c", 3]]);
-    });
-    it("Set", () => {
-        const acutal = chain(new Set([1, 2, 3])).union([2, 4]).toArray();
-        expect(acutal).toEqual([1, 2, 3, 4]);
-    });
-    it("object", () => {
-        const actual = chain<string, number>({ a: 10, b: 20 }).union([{ key: "a", value: 10 }, { key: "c", value: 30 }], ({ key }) => key).toArray();
-        expect(actual).toEqual([{ key: "a", value: 10 }, { key: "b", value: 20 }, { key: "c", value: 30 }]);
-    });
-});
+buildTest("union")
+    .case("simple", simpleArray, [...simpleArray, 4], [...simpleArray, 4])
+    .case(
+        "objects without stringifier",
+        complexArray,
+        [...complexArray, ...complexArray],
+        [{ a: 10 }, { a: 20 }, { a: 30 }]
+    )
+    .case("objects with stringifier", complexArray, [...complexArray], complexArray, objectStringifier)
+    .case("map", simpleMap, [["a", 1], ["b", 2], ["c", 3]], [["a", 1], ["c", 3]], keyStringifier)
+    .case("set", simpleSet, [...simpleArray, 4], [...simpleArray, 4])
+    .object("object", simpleObject, [["a", 1], ["b", 2], ["c", 3], ["d", 4]], [["c", 3], ["d", 4]], keyStringifier);

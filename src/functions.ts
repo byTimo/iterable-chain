@@ -1,6 +1,18 @@
-import { defaultComparer, defaultCondition, defaultConditionByElement, marker, selfSelector } from "./common";
+import {
+    defaultComparer,
+    defaultCondition,
+    defaultConditionByElement,
+    marker,
+    selfSelector,
+    Keyable,
+    KeyValue, selfToStringStringifier
+} from "./common";
 
-export function toObject<T, TKey extends string | number | symbol, TValue = T>(source: Iterable<T>, keySelector: (item: T) => TKey, valueSelector?: (item: T) => TValue): Record<TKey, TValue> {
+export function toObject<T, TKey extends string | number | symbol, TValue = T>(
+    source: Iterable<T>,
+    keySelector: (item: T) => TKey,
+    valueSelector?: (item: T) => TValue
+): Record<TKey, TValue> {
     valueSelector = valueSelector || selfSelector;
     const result: Record<TKey, TValue> = {} as any;
     for (const item of source) {
@@ -11,9 +23,13 @@ export function toObject<T, TKey extends string | number | symbol, TValue = T>(s
         result[key] = valueSelector(item);
     }
     return result;
-};
+}
 
-export function toMap<T, TKey extends string | number | symbol, TValue = T>(source: Iterable<T>, keySelector: (item: T) => TKey, valueSelector?: (item: T) => TValue): Map<TKey, TValue> {
+export function toMap<T, TKey extends string | number | symbol, TValue = T>(
+    source: Iterable<T>,
+    keySelector: (item: T) => TKey,
+    valueSelector?: (item: T) => TValue
+): Map<TKey, TValue> {
     valueSelector = valueSelector || selfSelector;
     const map: Map<TKey, TValue> = new Map();
     for (const item of source) {
@@ -24,7 +40,7 @@ export function toMap<T, TKey extends string | number | symbol, TValue = T>(sour
         map.set(key, valueSelector(item));
     }
     return map;
-};
+}
 
 export function some<T>(source: Iterable<T>, condition?: (item: T, index: number) => boolean): boolean {
     let i = 0;
@@ -33,17 +49,18 @@ export function some<T>(source: Iterable<T>, condition?: (item: T, index: number
         if (condition(item, i)) {
             return true;
         }
+        i++;
     }
     return false;
 }
 
-export function every<T>(source: Iterable<T>, condition?: (item: T, index: number) => boolean): boolean {
+export function every<T>(source: Iterable<T>, condition: (item: T, index: number) => boolean): boolean {
     let i = 0;
-    condition = condition || defaultConditionByElement;
     for (const item of source) {
         if (!condition(item, i)) {
             return false;
         }
+        i++;
     }
     return true;
 }
@@ -71,13 +88,18 @@ export function contains<T>(source: Iterable<T>, element: T, comparer?: (a: T, b
     return false;
 }
 
-export function firstOrDefault<T>(source: Iterable<T>, defaultValue: T, condition?: (item: T, index: number) => boolean): T {
+export function firstOrDefault<T>(
+    source: Iterable<T>,
+    defaultValue: T,
+    condition?: (item: T, index: number) => boolean
+): T {
     condition = condition || defaultCondition;
     let i = 0;
     for (const item of source) {
         if (condition(item, i)) {
             return item;
         }
+        i++;
     }
     return defaultValue;
 }
@@ -90,7 +112,11 @@ export function first<T>(source: Iterable<T>, condition?: (item: T, index: numbe
     return result;
 }
 
-export function singleOrDefault<T>(source: Iterable<T>, defaultValue: T, condition?: (item: T, index: number) => boolean): T {
+export function singleOrDefault<T>(
+    source: Iterable<T>,
+    defaultValue: T,
+    condition?: (item: T, index: number) => boolean
+): T {
     condition = condition || defaultCondition;
     let counter = 0, index = 0;
     let result: T;
@@ -121,7 +147,11 @@ export function single<T>(source: Iterable<T>, condition?: (item: T, index: numb
     return result;
 }
 
-export function lastOrDefault<T>(source: Iterable<T>, defaultValue: T, condition?: (item: T, index: number) => boolean): T {
+export function lastOrDefault<T>(
+    source: Iterable<T>,
+    defaultValue: T,
+    condition?: (item: T, index: number) => boolean
+): T {
     condition = condition || defaultCondition;
     let result = defaultValue, i = 0;
     for (const item of source) {
@@ -144,22 +174,44 @@ export function last<T>(source: Iterable<T>, condition?: (item: T, index: number
 export function reduce<T, U = T>(source: Iterable<T>, callback: (prev: U, cur: T, index: number) => U, initial?: U): U {
     const iterator = source[Symbol.iterator]();
     let index = 0;
-    let resutl: U = initial!;
+    let result: U = initial!;
     let next = iterator.next();
     if (arguments.length === 2) {
         if (next.done) {
             throw new Error("TODO");
         }
-        resutl = next.value as any as U;
+        result = next.value as any as U;
         index++;
         next = iterator.next();
     }
     while (!next.done) {
-        resutl = callback(resutl, next.value, index);
+        result = callback(result, next.value, index);
         index++;
         next = iterator.next();
     }
-    return resutl;
+    return result;
+}
+
+export function groupByGenerator<T, TKey, TValue = T>(
+    source: Iterable<T>,
+    keySelector: (item: T) => TKey,
+    valueSelector?: (item: T) => TValue,
+    keyStringifier?: (item: TKey) => Keyable,
+): Array<KeyValue<TKey, TValue[]>> {
+    valueSelector = valueSelector || selfSelector;
+    keyStringifier = keyStringifier || selfToStringStringifier;
+    const indexMap: Record<Keyable, number> = {} as any;
+    const result: Array<KeyValue<TKey, TValue[]>> = [];
+    for (const item of source) {
+        const key = keySelector(item);
+        const indexKey = keyStringifier(key);
+        if (indexMap[indexKey] == null) {
+            indexMap[indexKey] = result.push([key, []]) - 1;
+        }
+        const [, values] = result[indexMap[indexKey]]
+        values.push(valueSelector(item))
+    }
+    return result;
 }
 
 export function min(source: Iterable<number>): number {

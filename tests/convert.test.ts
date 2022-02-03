@@ -40,23 +40,23 @@ describe("convert", () => {
     describe("object", () => {
         it("to array", () => {
             const actual = chain({ a: 10, b: 20 }).toArray();
-            expect(actual).toEqual([{ key: "a", value: 10 }, { key: "b", value: 20 }]);
+            expect(actual).toEqual([["a", 10], ["b", 20]]);
         });
         it("to object without value selector", () => {
-            const actual = chain({ a: 10, b: 20 }).toObject(x => x.key);
-            expect(actual).toEqual({ a: { key: "a", value: 10 }, b: { key: "b", value: 20 } });
+            const actual = chain({ a: 10, b: 20 }).toObject(x => x[0]);
+            expect(actual).toEqual({ a: ["a", 10], b: ["b", 20] });
         });
         it("to object with value selector", () => {
-            const actual = chain({ a: 10, b: 20 }).toObject(x => x.key, x => x.value);
+            const actual = chain({ a: 10, b: 20 }).toObject(x => x[0], x => x[1]);
             expect(actual).toEqual({ a: 10, b: 20 });
         });
         it("to Map", () => {
-            const actual = chain({ a: 10, b: 20 }).toMap(x => x.key, x => x.value);
+            const actual = chain({ a: 10, b: 20 }).toMap(x => x[0], x => x[1]);
             expect(actual).toEqual(new Map([["a", 10], ["b", 20]]));
         });
         it("to Set", () => {
-            const actual = chain({a: 10, b: 20}).toSet()
-            expect(actual).toEqual(new Set([{ key: "a", value: 10 }, { key: "b", value: 20 }]));
-        })
-    })
+            const actual = chain({ a: 10, b: 20 }).toSet();
+            expect(actual).toEqual(new Set([["a", 10], ["b", 20]]));
+        });
+    });
 });
