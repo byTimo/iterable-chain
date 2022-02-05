@@ -1,4 +1,5 @@
-import { defaultComparer, KeyValue, selfSelector } from "./common";
+import { KeyValue, selfSelector, Keyable } from "./common";
+import { groupBy } from "./functions";
 
 export function* objectGenerator<TValue, TKey extends string | number | symbol, >(obj: Record<TKey, TValue>): Generator<KeyValue<TKey, TValue>> {
     for (const key in obj) {
@@ -127,27 +128,6 @@ export function unionGenerator<T>(first: Iterable<T>, second: Iterable<T>, strin
     return distinctGenerator(concatGenerator(first, second), stringifier);
 }
 
-export function groupComparedByGenerator<T, TKey, TValue = T>(
-    source: Iterable<T>,
-    keySelector: (item: T) => TKey,
-    keyComparer?: (a: TKey, b: TKey) => boolean,
-    valueSelector?: (item: T) => TValue
-) {
-    keyComparer = keyComparer || defaultComparer;
-    valueSelector = valueSelector || selfSelector;
-    const result: KeyValue<TKey, TValue[]>[] = [];
-    for (const item of source) {
-        const key = keySelector(item);
-        let pair = result.find(x => keyComparer!(x[0], key));
-        if (pair == null) {
-            pair = [key, []];
-            result.push(pair);
-        }
-        pair[1].push(valueSelector(item));
-    }
-    return result;
-}
-
 export function* flatMapGenerator<T, R>(source: Iterable<T>, selector: (item: T, index: number) => Iterable<R>) {
     let i = 0;
     for (const item of source) {
@@ -177,5 +157,26 @@ export function* zipGenerator<T1, T2, R = [T1, T2]>(
         yield selector(source1Next.value, source2Next.value);
         source1Next = aIter.next();
         source2Next = bIter.next();
+    }
+}
+
+export function* joinGenerator<T1, T2, TKey extends Keyable, R>(
+    source1: Iterable<T1>,
+    source2: Iterable<T2>,
+    source1KeyProvider: (item: T1) => TKey,
+    source2KeyProvider: (item: T2) => TKey,
+    selector: (item1: T1, item2: T2) => R
+) {
+    const source1ByKey = new Map(groupBy(source1, source1KeyProvider));
+    for (const item2 of source2) {
+        const key = source2KeyProvider(item2);
+        if (!source1ByKey.has(key)) {
+            continue;
+        }
+
+        const items1 = source1ByKey.get(key)!;
+        for (const item1 of items1) {
+            yield selector(item1, item2);
+        }
     }
 }

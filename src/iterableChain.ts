@@ -13,7 +13,8 @@ import {
     unionGenerator,
     reverseGenerator,
     flatMapGenerator,
-    zipGenerator
+    zipGenerator,
+    joinGenerator
 } from "./generators";
 import {
     contains,
@@ -32,7 +33,8 @@ import {
     max,
     min,
     sum,
-    groupByGenerator
+    groupBy,
+    sort
 } from "./functions";
 
 export interface IterableChain<T> extends Iterable<T> {
@@ -75,7 +77,14 @@ export interface IterableChain<T> extends Iterable<T> {
     ) => IterableChain<KeyValue<TKey, TValue[]>>;
     flatMap: <R>(selector: (item: T, index: number) => Iterable<R>) => IterableChain<R>;
     zip: <T2, R = [T, T2]>(other: Iterable<T2>, selector?: (item1: T, item2: T2) => R) => IterableChain<R>;
+    join: <T2, TKey extends Keyable, R>(
+        other: Iterable<T2>,
+        keySelector: (item1: T) => TKey,
+        otherKeySelector: (item2: T2) => TKey,
+        selector: (item1: T, item2: T2) => R
+    ) => IterableChain<R>;
     reduce: <U = T>(callback: (prev: U, cur: T, index: number) => U, initial?: U) => U;
+    sort: (comparer?: (a: T, b: T) => number) => IterableChain<T>;
     min: T extends number ? () => number : never;
     max: T extends number ? () => number : never;
     sum: T extends number ? () => number : never;
@@ -109,7 +118,7 @@ export function create<T>(source: Iterable<T>): IterableChain<T> {
         intersect: (other, stringifier) => fromGeneratorFunction(intersectGenerator, source, other, stringifier),
         union: (other, stringifier) => fromGeneratorFunction(unionGenerator, source, other, stringifier),
         groupBy: (keySelector, valueSelector, keyStringifier) => create(
-            groupByGenerator(
+            groupBy(
                 source,
                 keySelector,
                 valueSelector,
@@ -136,6 +145,15 @@ export function create<T>(source: Iterable<T>): IterableChain<T> {
                 ? reduce(source, callback)
                 : reduce(source, callback, initial);
         },
+        join: (other, keySelector, otherKeySelector, selector) => fromGeneratorFunction(
+            joinGenerator,
+            source,
+            other,
+            keySelector,
+            otherKeySelector,
+            selector
+        ),
+        sort: (comparer?: (a: T, b: T) => number) => create(sort(source, comparer)),
         max: () => max(source as any),
         min: () => min(source as any),
         sum: () => sum(source as any),

@@ -192,7 +192,7 @@ export function reduce<T, U = T>(source: Iterable<T>, callback: (prev: U, cur: T
     return result;
 }
 
-export function groupByGenerator<T, TKey, TValue = T>(
+export function groupBy<T, TKey, TValue = T>(
     source: Iterable<T>,
     keySelector: (item: T) => TKey,
     valueSelector?: (item: T) => TValue,
@@ -213,6 +213,13 @@ export function groupByGenerator<T, TKey, TValue = T>(
     }
     return result;
 }
+
+export function sort<T>(source: Iterable<T>, comparer?: (a: T, b: T) => number) {
+    const buffer = Array.from(source);
+    buffer.sort(comparer);
+    return buffer;
+}
+
 
 export function min(source: Iterable<number>): number {
     return Math.min(...source);

@@ -16,7 +16,8 @@ import {
     unionGenerator,
     flatMapGenerator,
     objectGenerator,
-    zipGenerator
+    zipGenerator,
+    joinGenerator
 } from "./generators";
 import {
     contains,
@@ -32,7 +33,9 @@ import {
     reduce,
     min,
     max,
-    sum, groupByGenerator
+    sum,
+    groupBy,
+    sort
 } from "./functions";
 import { isIterable, KeyValue, IterableObject, Keyable } from "./common";
 
@@ -136,7 +139,7 @@ export const chain: Chain = (function() {
             valueSelector?: (item: T) => TValue,
             keyStringifier?: (key: TKey) => Keyable
         ) {
-            return create(groupByGenerator(source, keySelector, valueSelector, keyStringifier));
+            return create(groupBy(source, keySelector, valueSelector, keyStringifier));
         };
     func.flatMap =
         function <T, R>(source: Iterable<T>, selector: (item: T, index: number) => Iterable<R>): IterableChain<R> {
@@ -150,6 +153,26 @@ export const chain: Chain = (function() {
         ): IterableChain<R> {
             return fromGeneratorFunction(zipGenerator, source1, source2, selector);
         };
+    func.join =
+        function <T1, T2, TKey extends Keyable, R>(
+            source1: Iterable<T1>,
+            source2: Iterable<T2>,
+            source1KeyProvider: (item: T1) => TKey,
+            source2KeyProvider: (item: T2) => TKey,
+            selector: (item1: T1, item2: T2) => R
+        ): IterableChain<R> {
+            return fromGeneratorFunction(
+                joinGenerator,
+                source1,
+                source2,
+                source1KeyProvider,
+                source2KeyProvider,
+                selector
+            );
+        };
+    func.sort = function <T>(source: Iterable<T>, comparer?: (a: T, b: T) => number) {
+        return create(sort(source, comparer));
+    };
     func.some = some;
     func.every = every;
     func.count = count;
