@@ -1,62 +1,122 @@
 import { chain } from "../src";
+import { simpleArray, simpleMap, simpleSet, simpleObject } from "./common";
 
 describe("convert", () => {
-    describe("array", () => {
-        it("to array", () => {
-            const actual = chain([1, 2, 3, 4]).toArray();
-            expect(actual).toEqual([1, 2, 3, 4]);
+    describe("toArray", () => {
+        it("source is array", () => {
+            const actual = chain(simpleArray).toArray();
+            expect(actual).toBe(simpleArray);
         });
-        it("to object without value selector", () => {
-            const actual = chain([{ a: 1 }, { a: 2 }, { a: 3 }]).toObject(x => x.a);
-            expect(actual).toEqual({ 1: { a: 1 }, 2: { a: 2 }, 3: { a: 3 } });
+
+        it("source is other iterable", () => {
+            const actual = chain(simpleArray).map(x => x).toArray();
+            expect(actual).not.toBe(simpleArray);
+            expect(actual).toEqual(simpleArray);
         });
-        it("to object with value selector", () => {
-            const actual = chain([{ a: 1 }, { a: 2 }, { a: 3 }]).toObject(x => x.a, x => x.a);
-            expect(actual).toEqual({ 1: 1, 2: 2, 3: 3 });
+
+        it("map", () => {
+            const actual = chain(simpleMap).toArray();
+            expect(actual).toEqual([["a", 1], ["b", 2]]);
         });
-        it("to object with duplicate key - throw error", () => {
-            expect(() => {
-                chain([1, 2, 3, 4]).toObject(x => x % 2);
-            }).toThrow();
+
+        it("set", () => {
+            const actual = chain(simpleSet).toArray();
+            expect(actual).toEqual(simpleArray);
         });
-        it("to Set", () => {
-            const actual = chain([1, 2, 2, 4, 5]).toSet();
-            expect(actual).toEqual(new Set([1, 2, 4, 5]));
-        });
-        it("to Map without value selector", () => {
-            const actual = chain([{ a: 1 }, { a: 2 }, { a: 3 }]).toMap(x => x.a);
-            expect(actual).toEqual(new Map([[1, { a: 1 }], [2, { a: 2 }], [3, { a: 3 }]]));
-        });
-        it("to Map with value selector", () => {
-            const actual = chain([{ a: 1 }, { a: 2 }, { a: 3 }]).toMap(x => x.a, x => x.a);
-            expect(actual).toEqual(new Map([[1, 1], [2, 2], [3, 3]]));
-        });
-        it("to Map with duplicate key - throw error", () => {
-            expect(() => {
-                chain([1, 2, 3, 4]).toMap(x => x % 2);
-            }).toThrow();
+
+        it("object", () => {
+            const actual = chain(simpleObject).toArray();
+            expect(actual).toEqual([["a", 1], ["b", 2], ["c", 3]]);
         });
     });
-    describe("object", () => {
-        it("to array", () => {
-            const actual = chain({ a: 10, b: 20 }).toArray();
-            expect(actual).toEqual([["a", 10], ["b", 20]]);
+
+    describe("toSet", () => {
+        it("source is set", () => {
+            const actual = chain(simpleSet).toSet();
+            expect(actual).toBe(simpleSet);
         });
-        it("to object without value selector", () => {
-            const actual = chain({ a: 10, b: 20 }).toObject(x => x[0]);
-            expect(actual).toEqual({ a: ["a", 10], b: ["b", 20] });
+
+        it("source is other iterable", () => {
+            const actual = chain(simpleSet).map(x => x).toSet();
+            expect(actual).not.toBe(simpleSet);
+            expect(actual).toEqual(simpleSet);
         });
-        it("to object with value selector", () => {
-            const actual = chain({ a: 10, b: 20 }).toObject(x => x[0], x => x[1]);
-            expect(actual).toEqual({ a: 10, b: 20 });
+
+        it("map", () => {
+            const actual = chain(simpleMap).toSet();
+            expect(actual).toEqual(new Set([["a", 1], ["b", 2]]));
         });
-        it("to Map", () => {
-            const actual = chain({ a: 10, b: 20 }).toMap(x => x[0], x => x[1]);
-            expect(actual).toEqual(new Map([["a", 10], ["b", 20]]));
+
+        it("object", () => {
+            const actual = chain(simpleObject).toSet();
+            expect(actual).toEqual(new Set([["a", 1], ["b", 2], ["c", 3]]));
         });
-        it("to Set", () => {
-            const actual = chain({ a: 10, b: 20 }).toSet();
-            expect(actual).toEqual(new Set([["a", 10], ["b", 20]]));
+    });
+
+    describe("toMap", () => {
+        it("source is map", () => {
+            const actual = chain(simpleMap).toMap(([key]) => key);
+            expect(actual).toBe(simpleMap);
+        });
+
+        it("source is other iterable", () => {
+            const actual = chain(simpleMap).map(x => x).toMap(([key]) => key);
+            expect(actual).not.toBe(simpleMap);
+            expect(actual).toEqual(new Map([["a", ["a", 1]], ["b", ["b", 2]]]));
+        });
+
+        it("without value selector", () => {
+            const actual = chain(["a", "b"]).zip(simpleArray).toMap(([key]) => key);
+            expect(actual).toEqual(new Map([["a", ["a", 1]], ["b", ["b", 2]]]));
+        });
+
+        it("with value selector", () => {
+            const actual = chain(["a", "b"]).zip(simpleArray).toMap(([key]) => key, ([, value]) => value);
+            expect(actual).toEqual(simpleMap);
+        });
+
+        it("duplicated keys", () => {
+            expect(() => {
+                chain(simpleArray).toMap(x => x % 2);
+            }).toThrow();
+        });
+
+        it("set", () => {
+            const actual = chain(simpleSet).toMap(x => x);
+            expect(actual).toEqual(new Map([[1, 1], [2, 2], [3, 3]]));
+        });
+
+        it("object", () => {
+            const actual = chain(simpleObject).take(2).toMap(([key]) => key, ([, value]) => value);
+            expect(actual).toEqual(simpleMap);
+        });
+    });
+
+    describe("toObject", () => {
+        it("without value selector", () => {
+            const actual = chain(["a", "b", "c"]).zip(simpleArray).toObject(([key]) => key);
+            expect(actual).toEqual({ a: ["a", 1], b: ["b", 2], c: ["c", 3] });
+        });
+
+        it("with value selector", () => {
+            const actual = chain(["a", "b", "c"]).zip(simpleArray).toObject(([key]) => key, ([, value]) => value);
+            expect(actual).toEqual(simpleObject);
+        });
+
+        it("duplicated keys", () => {
+            expect(() => {
+                chain(simpleArray).toObject(x => x % 2);
+            }).toThrow();
+        });
+
+        it("set", () => {
+            const actual = chain(simpleSet).toObject(x => x, x => x);
+            expect(actual).toEqual({ 1: 1, 2: 2, 3: 3 });
+        });
+
+        it("object", () => {
+            const actual = chain(simpleObject).toObject(([key]) => key, ([, value]) => value);
+            expect(actual).toEqual(simpleObject);
         });
     });
 });

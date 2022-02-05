@@ -1,7 +1,7 @@
 import { KeyValue, selfSelector, Keyable } from "./common";
 import { groupBy } from "./functions";
 
-export function* objectGenerator<TValue, TKey extends string | number | symbol, >(obj: Record<TKey, TValue>): Generator<KeyValue<TKey, TValue>> {
+export function* objectGenerator<TValue, TKey extends Keyable, >(obj: Record<TKey, TValue>): Generator<KeyValue<TKey, TValue>> {
     for (const key in obj) {
         if (obj.hasOwnProperty(key)) {
             yield [key, obj[key]];

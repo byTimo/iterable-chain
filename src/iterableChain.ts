@@ -39,11 +39,11 @@ import {
 
 export interface IterableChain<T> extends Iterable<T> {
     toArray: () => T[];
-    toObject: <TKey extends string | number | symbol, TValue = T>(
+    toObject: <TKey extends Keyable, TValue = T>(
         keySelector: (item: T) => TKey,
         valueSelector?: (item: T) => TValue
     ) => Record<TKey, TValue>;
-    toMap: <TKey extends string | number | symbol, TValue = T>(
+    toMap: <TKey extends Keyable, TValue = T>(
         keySelector: (item: T) => TKey,
         valueSelector?: (item: T) => TValue
     ) => Map<TKey, TValue>;
@@ -136,10 +136,6 @@ export function create<T>(source: Iterable<T>): IterableChain<T> {
         singleOrDefault: (defaultValue, condition) => singleOrDefault(source, defaultValue, condition),
         last: (condition) => last(source, condition),
         lastOrDefault: (defaultValue, condition) => lastOrDefault(source, defaultValue, condition),
-        toArray: () => Array.isArray(source) ? source : Array.from(source),
-        toSet: () => new Set(source),
-        toObject: (keySelector, valueSelector) => toObject(source, keySelector, valueSelector),
-        toMap: (keySelector, valueSelector) => toMap(source, keySelector, valueSelector),
         reduce: function(callback, initial) {
             return arguments.length === 1
                 ? reduce(source, callback)
@@ -159,6 +155,12 @@ export function create<T>(source: Iterable<T>): IterableChain<T> {
         sum: () => sum(source as any),
         [Symbol.iterator]: () => source[Symbol.iterator](),
         [chainMarker]: true,
+        toArray: () => Array.isArray(source) ? source : Array.from(source),
+        toSet: () => source instanceof Set ? source : new Set(source),
+        toMap: (keySelector, valueSelector) => source instanceof Map
+            ? source
+            : toMap(source, keySelector, valueSelector),
+        toObject: (keySelector, valueSelector) => toObject(source, keySelector, valueSelector),
     };
 
     return iter as IterableChain<T>;

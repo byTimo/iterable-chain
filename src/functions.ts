@@ -8,7 +8,9 @@ import {
     KeyValue, selfToStringStringifier
 } from "./common";
 
-export function toObject<T, TKey extends string | number | symbol, TValue = T>(
+const noItemsByConditionErrorMessage = "There are no items in the collection by the specified condition";
+
+export function toObject<T, TKey extends Keyable, TValue = T>(
     source: Iterable<T>,
     keySelector: (item: T) => TKey,
     valueSelector?: (item: T) => TValue
@@ -25,7 +27,7 @@ export function toObject<T, TKey extends string | number | symbol, TValue = T>(
     return result;
 }
 
-export function toMap<T, TKey extends string | number | symbol, TValue = T>(
+export function toMap<T, TKey extends Keyable, TValue = T>(
     source: Iterable<T>,
     keySelector: (item: T) => TKey,
     valueSelector?: (item: T) => TValue
@@ -107,7 +109,7 @@ export function firstOrDefault<T>(
 export function first<T>(source: Iterable<T>, condition?: (item: T, index: number) => boolean): T {
     const result = firstOrDefault(source, marker as any, condition);
     if (result === marker) {
-        throw new Error("Collection doesn't contains elements");
+        throw new Error(noItemsByConditionErrorMessage);
     }
     return result;
 }
@@ -136,13 +138,13 @@ export function singleOrDefault<T>(
     if (counter === 1) {
         return result!;
     }
-    throw new Error("TODO");
+    throw new Error("There is more then one item in the collection by the specified condition");
 }
 
 export function single<T>(source: Iterable<T>, condition?: (item: T, index: number) => boolean): T {
     const result = singleOrDefault(source, marker, condition);
     if (result === marker) {
-        throw new Error("TODO");
+        throw new Error(noItemsByConditionErrorMessage);
     }
     return result;
 }
@@ -166,7 +168,7 @@ export function lastOrDefault<T>(
 export function last<T>(source: Iterable<T>, condition?: (item: T, index: number) => boolean): T {
     const result = lastOrDefault(source, marker, condition);
     if (result === marker) {
-        throw new Error("TODO");
+        throw new Error(noItemsByConditionErrorMessage);
     }
     return result;
 }
@@ -178,7 +180,7 @@ export function reduce<T, U = T>(source: Iterable<T>, callback: (prev: U, cur: T
     let next = iterator.next();
     if (arguments.length === 2) {
         if (next.done) {
-            throw new Error("TODO");
+            throw new Error("Can't reduce an empty collection without specifying the initial value of the accumulator");
         }
         result = next.value as any as U;
         index++;

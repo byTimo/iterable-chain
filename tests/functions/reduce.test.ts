@@ -4,6 +4,7 @@ import { chain } from "../../src";
 const keysReducer = ([accKey, accValue]: any, [key, value]: any) => [accKey + key, accValue + value];
 
 buildTest("reduce")
+    .caseCallback("empty with initial", [], 5, reduce => reduce((a, c) => a + c, 5))
     .case("array", simpleArray, 6, (a: any, c) => a + c)
     .case("array with initial", simpleArray, 106, (a: any, c) => a + c, 100)
     .case("array with other type initial", simpleArray, "123", (a: any, c) => a + c, "")
@@ -12,14 +13,14 @@ buildTest("reduce")
     .object("object", simpleObject, ["abc", 6], keysReducer)
 
 describe("reduce", () => {
-    it("static: empty", () => {
+    it("static: empty without initial", () => {
         expect(chain(simpleArray).reduce((a, c) => a + c)).toBe(6);
         expect(() => {
             chain.reduce([], x => x);
         }).toThrow();
     });
 
-    it("chain: empty", () => {
+    it("chain: empty without initial", () => {
         expect(() => {
             chain([]).reduce(x => x);
         }).toThrow();
