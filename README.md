@@ -1,4 +1,3 @@
 ## TODO
-- Docs
 - README
 - CI

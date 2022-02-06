@@ -21,10 +21,10 @@ export function* repeatGenerator<T>(value: T, count: number) {
     }
 }
 
-export function* mapGenerator<T, R>(source: Iterable<T>, selector: (item: T, index: number) => R) {
+export function* mapGenerator<T, R>(source: Iterable<T>, mapper: (item: T, index: number) => R) {
     let i = 0;
     for (const item of source) {
-        yield selector(item, i);
+        yield mapper(item, i);
         i++;
     }
 }
@@ -128,11 +128,11 @@ export function unionGenerator<T>(first: Iterable<T>, second: Iterable<T>, strin
     return distinctGenerator(concatGenerator(first, second), stringifier);
 }
 
-export function* flatMapGenerator<T, R>(source: Iterable<T>, selector: (item: T, index: number) => Iterable<R>) {
+export function* flatMapGenerator<T, R>(source: Iterable<T>, mapper: (item: T, index: number) => Iterable<R>) {
     let i = 0;
     for (const item of source) {
-        const selected = selector(item, i);
-        for (const selectedItem of selected) {
+        const mapped = mapper(item, i);
+        for (const selectedItem of mapped) {
             yield selectedItem;
         }
         i++;
