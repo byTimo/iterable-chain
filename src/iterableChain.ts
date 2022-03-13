@@ -106,14 +106,14 @@ export interface IterableChain<T> extends Iterable<T> {
 
     /**
      * Creates a new iterable object that skips the specified number of the items during the iteration. If the Iterable
-     * has fewer item than the skipped number, an empty Iterable is returned.
+     * has fewer item than the skipped number, an empty Iterable are returned.
      * @param count the number of the skipping items.
      */
     skip: (count: number) => IterableChain<T>;
 
     /**
      * Creates a new iterable object that takes the specified number of the items during the iteration. If the Iterable
-     * has fewer item than the taken number, all items of the Iterable is iterated.
+     * has fewer item than the taken number, all items of the Iterable are iterated.
      * @param count the number of the taken items.
      */
     take: (count: number) => IterableChain<T>;
@@ -161,7 +161,7 @@ export interface IterableChain<T> extends Iterable<T> {
      * tuple `[key, value[]]`. By default, the iterable item value is used as the group value, but if `valueSelector` is
      * passed, result of the `valueSelector` is used as the group value. The method uses {} for grouping inside, so for
      * non-primitives values of keys is used `toString` method. If `keyStringifier` is passed, the method uses its
-     * its results for grouping inside, but does not change outgoing keys.
+     * results for grouping inside, but does not change outgoing keys.
      * @param keySelector a function that selects the key form the item.
      * @param valueSelector a function that selects the value from the item.
      * @param keyStringifier a function that transforms each key of the item to a string. These strings are used for comparison.
@@ -189,7 +189,7 @@ export interface IterableChain<T> extends Iterable<T> {
     zip: <T2, R = [T, T2]>(other: Iterable<T2>, mapper?: (item1: T, item2: T2) => R) => IterableChain<R>;
 
     /**
-     * Creates a new iterable object that iterates joined items with the other Iterable. The items is joined by keys.
+     * Creates a new iterable object that iterates joined items with the other Iterable. The items are joined by keys.
      * The `keySelector` and the `otherKeySelector` function select a key from the items of both Iterables. Joined value
      * of the items of both Iterables is created by `mapper`.
      * @param other an other Iterable.
@@ -390,7 +390,7 @@ export function create<T>(source: Iterable<T>): IterableChain<T> {
         [chainMarker]: true,
         toArray: () => Array.isArray(source) ? source : Array.from(source),
         toSet: () => source instanceof Set ? source : new Set(source),
-        toMap: (keySelector, valueSelector) => source instanceof Map
+        toMap: (keySelector, valueSelector) => valueSelector == null && source instanceof Map
             ? source
             : toMap(source, keySelector, valueSelector),
         toObject: (keySelector, valueSelector) => toObject(source, keySelector, valueSelector),

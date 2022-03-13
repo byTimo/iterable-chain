@@ -108,7 +108,7 @@ export interface Chain {
 
     /**
      * Creates a new iterable object that skips the specified number of the items during the iteration. If the Iterable
-     * has fewer item than the skipped number, an empty Iterable is returned.
+     * has fewer item than the skipped number, an empty Iterable are returned.
      * @param source an Iterable.
      * @param count the number of the skipping items.
      */
@@ -116,7 +116,7 @@ export interface Chain {
 
     /**
      * Creates a new iterable object that takes the specified number of the items during the iteration. If the Iterable
-     * has fewer item than the taken number, all items of the Iterable is iterated.
+     * has fewer item than the taken number, all items of the Iterable are iterated.
      * @param source an Iterable.
      * @param count the number of the taken items.
      */
@@ -170,7 +170,7 @@ export interface Chain {
      * tuple `[key, value[]]`. By default, the iterable item value is used as the group value, but if `valueSelector` is
      * passed, result of the `valueSelector` is used as the group value. The method uses {} for grouping inside, so for
      * non-primitives values of keys is used `toString` method. If `keyStringifier` is passed, the method uses its
-     * its results for grouping inside, but does not change outgoing keys.
+     * results for grouping inside, but does not change outgoing keys.
      * @param source an Iterable.
      * @param keySelector a function that selects the key form the item.
      * @param valueSelector a function that selects the value from the item.
@@ -206,7 +206,7 @@ export interface Chain {
     ) => IterableChain<R>,
 
     /**
-     * Creates a new iterable object that iterates joined items with the other Iterable. The items is joined by keys.
+     * Creates a new iterable object that iterates joined items with the other Iterable. The items are joined by keys.
      * The `keySelector` and the `otherKeySelector` function select a key from the items of both Iterables. Joined value
      * of the items of both Iterables is created by `mapper`.
      * @param source an Iterable.
