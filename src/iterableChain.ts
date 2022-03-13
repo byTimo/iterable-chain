@@ -1,168 +1,159 @@
-import { IterableChain, create, fromGeneratorFunction } from "./iterableChain";
+import { KeyValue, Keyable, chainMarker } from "./common";
 import {
+    mapGenerator,
+    filterGenerator,
     appendGenerator,
     concatGenerator,
-    distinctGenerator,
-    exceptGenerator,
-    filterGenerator,
-    intersectGenerator,
-    mapGenerator,
     prependGenerator,
-    rangeGenerator,
-    repeatGenerator,
-    reverseGenerator,
     skipGenerator,
     takeGenerator,
+    distinctGenerator,
+    exceptGenerator,
+    intersectGenerator,
     unionGenerator,
+    reverseGenerator,
     flatMapGenerator,
-    objectGenerator,
     zipGenerator,
     joinGenerator
 } from "./generators";
 import {
     contains,
     count,
+    some,
     every,
     first,
     firstOrDefault,
-    last,
-    lastOrDefault,
     single,
     singleOrDefault,
-    some,
+    last,
+    lastOrDefault,
+    toObject,
+    toMap,
     reduce,
-    min,
     max,
+    min,
     sum,
     groupBy,
     sort
 } from "./functions";
-import { isIterable, KeyValue, IterableObject, Keyable } from "./common";
 
-export interface Chain {
+export interface IterableChain<T> extends Iterable<T> {
     /**
-     * The function creates wrapper around an iterable or an object. The wrapper provides methods for creating
-     * a data modification chain.
-     * @param source any iterable like array, map, set or generator
+     * Converts the iterable into an array.
      */
-    <T>(source: Iterable<T>): IterableChain<T>;
+    toArray: () => T[];
 
     /**
-     * The function creates wrapper around iterable collection or object. The wrapper provides methods for creating
-     * a data modification chain.
-     * @param source any object that will be transformed into Iterable<[key, value]>
+     * Converts the iterable into an object. The object is created by keys that provide by the `keySelector` function.
+     * By default, the iterable item value is used as the object value, but if `valueSelector` is passed, result of
+     * the `valueSelector` is used as the object value.
+     * @param keySelector a function that selects the key from the item.
+     * @param valueSelector a function that selects the value from the item.
      */
-    <TValue = unknown, TKey extends Keyable = Keyable>(source: IterableObject<TValue, TKey>): IterableChain<KeyValue<TKey, TValue>>;
+    toObject: <TKey extends Keyable, TValue = T>(
+        keySelector: (item: T) => TKey,
+        valueSelector?: (item: T) => TValue
+    ) => Record<TKey, TValue>;
 
     /**
-     * Creates a new iterable object that iterates the range of numbers from `start`. Each next number is the increment
-     * of the previous number. The method generates `count` numbers.
-     * @param start a number that starts a range.
-     * @param count a number of numbers.
+     * Converts the iterable into a Map. The Map is created by keys that provide by the `keySelector` function.
+     * By default, the iterable item value is used as the map value, but if `valueSelector` is passed, result of
+     * the `valueSelector` is used as the map value.
+     * @param keySelector a function that selects the key from the item.
+     * @param valueSelector a function that selects the value from the item.
      */
-    range: (start: number, count: number) => IterableChain<number>;
+    toMap: <TKey extends Keyable, TValue = T>(
+        keySelector: (item: T) => TKey,
+        valueSelector?: (item: T) => TValue
+    ) => Map<TKey, TValue>;
 
     /**
-     * Create a new iterable object that repeat `value` `count` times during the iteration.
-     * @param value a repeating value.
-     * @param count a number of repeated times.
+     * Converts the iterable into a set
      */
-    repeat: <T>(value: T, count: number) => IterableChain<T>;
+    toSet: () => Set<T>;
 
     /**
      * Creates a new iterable object that, during iteration,
      * maps each item of the previous iterable object using the passed function.
-     * @param source an Iterable.
      * @param mapper a function that maps an item to an item in the next iterable.
      */
-    map: <T, R>(source: Iterable<T>, selector: (item: T, index: number) => R) => IterableChain<R>;
+    map: <R>(mapper: (item: T, index: number) => R) => IterableChain<R>;
 
     /**
      * Creates a new iterable object. During the iteration,
      * it leaves only those items for which the condition returns true.
-     * @param source an Iterable.
      * @param condition a function that has to returns true for item if this item doesn't need to be skipped.
      */
-    filter: typeof filter;
+    filter: FilterOverride<T>;
 
     /**
      * Creates a new iterable object that iterates all previous values and adds the passed item to the end of the iteration.
-     * @param source an Iterable.
      * @param element is added to the end of the iteration.
      */
-    append: <T>(source: Iterable<T>, element: T) => IterableChain<T>;
+    append: (element: T) => IterableChain<T>;
 
     /**
      * Creates a new iterable object that iterates all previous values and adds the passed item to the beginning of the iteration.
-     * @param source an Iterable.
      * @param element is added to the beginning of the iteration.
      */
-    prepend: <T>(source: Iterable<T>, element: T) => IterableChain<T>;
+    prepend: (element: T) => IterableChain<T>;
 
     /**
      * Creates a new iterable object that iterates over all previous values, and after all the values of the passed Iterable.
-     * @param source an Iterable.
      * @param other a Iterable whose values are iterated after the previous values.
      */
-    concat: <T, S>(source: Iterable<T>, other: Iterable<S>) => IterableChain<T | S>;
+    concat: <S>(other: Iterable<S>) => IterableChain<T | S>;
 
     /**
      * Creates a new iterable object that skips the specified number of the items during the iteration. If the Iterable
      * has fewer item than the skipped number, an empty Iterable are returned.
-     * @param source an Iterable.
      * @param count the number of the skipping items.
      */
-    skip: <T>(source: Iterable<T>, count: number) => IterableChain<T>;
+    skip: (count: number) => IterableChain<T>;
 
     /**
      * Creates a new iterable object that takes the specified number of the items during the iteration. If the Iterable
      * has fewer item than the taken number, all items of the Iterable are iterated.
-     * @param source an Iterable.
      * @param count the number of the taken items.
      */
-    take: <T>(source: Iterable<T>, count: number) => IterableChain<T>;
+    take: (count: number) => IterableChain<T>;
 
     /**
      * Creates a new iterable object that reverses the order of the items.
-     * @param source an Iterable.
      */
-    reverse: <T>(source: Iterable<T>) => IterableChain<T>;
+    reverse: () => IterableChain<T>;
 
     /**
      * Creates a new iterable object that iterates only unique items. The method uses Set inside, so non-primitives values
      * are compared by references. If the stringifier is passed, the method uses its results as a values for comparison.
-     * @param source an Iterable.
      * @param stringifier a function that transforms each item of the Iterable to a string. These strings are used for comparison.
      */
-    distinct: <T>(source: Iterable<T>, stringifier?: (item: T) => string) => IterableChain<T>;
+    distinct: (stringifier?: (item: T) => string) => IterableChain<T>;
 
     /**
      * Creates a new iterable object that iterates only those items that are not in `other` Iterable. The method uses
      * Set inside, so non-primitives values are compared by references. If the stringifier is passed, the method uses
      * its results as a values for comparison.
-     * @param source an Iterable.
      * @param stringifier a function that transforms each item of Iterables to a string. These strings are used for comparison.
      */
-    except: <T>(first: Iterable<T>, second: Iterable<T>, stringifier?: (item: T) => string) => IterableChain<T>;
+    except: (other: Iterable<T>, stringifier?: (item: T) => string) => IterableChain<T>;
 
     /**
      * Creates a new iterable object that iterates only those items that are in `other` Iterable. The method uses
      * Set inside, so non-primitives values are compared by references. If the stringifier is passed, the method uses
      * its results as a values for comparison.
-     * @param source an Iterable.
      * @param stringifier a function that transforms each item of Iterables to a string. These strings are used for comparison.
      */
-    intersect: <T>(first: Iterable<T>, second: Iterable<T>, stringifier?: (item: T) => string) => IterableChain<T>;
+    intersect: (other: Iterable<T>, stringifier?: (item: T) => string) => IterableChain<T>;
 
     /**
      * Creates a new iterable object that iterates over all previous values, and after only those items of the `other`
      * Iterable that are not in the previous values. The method uses Set inside, so non-primitives values are compared
      * by references. If the stringifier is passed, the method uses its results as a values for comparison.
-     * @param source an Iterable.
      * @param other a Iterable whose values are iterated after the previous values.
      * @param stringifier a function that transforms each item of Iterables to a string. These strings are used for comparison.
      */
-    union: <T>(source: Iterable<T>, other: Iterable<T>, stringifier?: (item: T) => string) => IterableChain<T>;
+    union: (other: Iterable<T>, stringifier?: (item: T) => string) => IterableChain<T>;
 
     /**
      * Creates a new iterable object that groups all items and iterates the groups. The groups are created by keys that
@@ -171,304 +162,246 @@ export interface Chain {
      * passed, result of the `valueSelector` is used as the group value. The method uses {} for grouping inside, so for
      * non-primitives values of keys is used `toString` method. If `keyStringifier` is passed, the method uses its
      * results for grouping inside, but does not change outgoing keys.
-     * @param source an Iterable.
      * @param keySelector a function that selects the key form the item.
      * @param valueSelector a function that selects the value from the item.
      * @param keyStringifier a function that transforms each key of the item to a string. These strings are used for comparison.
      */
-    groupBy: <T, TKey, TValue = T>(
-        source: Iterable<T>,
+    groupBy: <TKey, TValue = T>(
         keySelector: (item: T) => TKey,
         valueSelector?: (item: T) => TValue,
-        keyStringifier?: (key: TKey) => Keyable,
+        keyStringifier?: (key: TKey) => Keyable
     ) => IterableChain<KeyValue<TKey, TValue[]>>;
 
     /**
      * Creates a new iterable object that, maps each item of the previous Iterable to other Iterable
      * and iterates each item of the resulting Iterable.
-     * @param source an Iterable.
      * @param mapper a function that maps the item to an Iterable.
      */
-    flatMap: <T, R>(source: Iterable<T>, selector: (item: T, index: number) => Iterable<R>) => IterableChain<R>;
+    flatMap: <R>(mapper: (item: T, index: number) => Iterable<R>) => IterableChain<R>;
 
     /**
      * Creates a new iterable object that iterates pairs of the previous Iterable items and the other Iterable. If
      * the previous Iterable and the other Iterable have different number of items, the method uses the number of items
      * the smallest Iterable. If mapper is passed, the method does not iterate pairs, but the results of the mapper.
-     * @param source an Iterable.
      * @param other an other Iterable.
      * @param mapper a function that returns an iterating value by items of the previous and other Iterables.
      */
-    zip: <T1, T2, R = [T1, T2]>(
-        source: Iterable<T1>,
-        other: Iterable<T2>,
-        mapper?: (a: T1, b: T2) => R
-    ) => IterableChain<R>,
+    zip: <T2, R = [T, T2]>(other: Iterable<T2>, mapper?: (item1: T, item2: T2) => R) => IterableChain<R>;
 
     /**
      * Creates a new iterable object that iterates joined items with the other Iterable. The items are joined by keys.
      * The `keySelector` and the `otherKeySelector` function select a key from the items of both Iterables. Joined value
      * of the items of both Iterables is created by `mapper`.
-     * @param source an Iterable.
      * @param other an other Iterable.
      * @param keySelector a function that selects the key of the item of the previous Iterable.
      * @param otherKeySelector a function that selects the key of the item of the other Iterable.
      * @param mapper a function that provides a joined value.
      */
-    join: <T1, T2, TKey extends Keyable, R>(
-        source: Iterable<T1>,
+    join: <T2, TKey extends Keyable, R>(
         other: Iterable<T2>,
-        sourceKeySelector: (item: T1) => TKey,
-        otherKeySelector: (item: T2) => TKey,
-        mapper: (a: T1, b: T2) => R
+        keySelector: (item1: T) => TKey,
+        otherKeySelector: (item2: T2) => TKey,
+        mapper: (item1: T, item2: T2) => R
     ) => IterableChain<R>;
 
     /**
      * Create a new iterable object that iterates items in the sorted order. If `comparer` is passed, it is used to
      * define the order of the result Iterable by comparing two items.
-     * @param source an Iterable.
      * @param comparer a function that defines the sort order.
      */
-    sort: <T>(source: Iterable<T>, comparer?: (a: T, b: T) => number) => IterableChain<T>;
+    sort: (comparer?: (a: T, b: T) => number) => IterableChain<T>;
 
     /**
      * Enumerates Iterable and returns reduced value. The method uses `callback` to define how to reduce the Iterable.
      * By default, the first item of the Iterable is used as initial value of the reduced value. If `initial` param is
      * passed, it is used as initial value. If `initial` is not passed and the Iterable is empty, the method throws an error.
-     * @param source an Iterable.
      * @param callback a function that defines how to reduce the Iterable.
      * @param initial a value is used as the initial reduced value.
      */
-    reduce: typeof reduce;
+    reduce: <U = T>(callback: (prev: U, cur: T, index: number) => U, initial?: U) => U;
 
     /**
      * Enumerates Iterable and returns the first item that satisfies the condition. If the condition is not passed,
      * the method returns the first item of the Iterable. If there is no item that satisfies the condition
      * or the condition is not passed and the Iterable is empty, the method throws an error.
-     * @param source an Iterable.
      * @param condition a function that checks each item of the Iterable. The method returns the first item for which
      * condition returns true.
      */
-    first: typeof first;
+    first: (condition?: (item: T, index: number) => boolean) => T;
 
     /**
      * Enumerates Iterable and returns the first item that satisfies the condition. If the condition is not passed,
      * the method returns the first item of the Iterable. If there is no item that satisfies the condition
      * or the condition is not passed and the Iterable is empty, the method returns the `defaultValue`.
-     * @param source an Iterable.
      * @param defaultValue a value that is returned if the Iterable doesn't have items that satisfy the condition.
      * @param condition a function that checks each item of the Iterable. The method returns the first item for which
      * condition returns true.
      */
-    firstOrDefault: typeof firstOrDefault;
+    firstOreDefault: (defaultValue: T, condition?: (item: T, index: number) => boolean) => T;
 
     /**
      * Enumerates Iterable and returns the single item that satisfies the condition. If the condition is not passed,
      * the method returns the first item of the Iterable. If there is no item that satisfies the condition,
      * the condition is not passed and the Iterable is empty or there are several items that satisfy the condition,
      * the method throws an error.
-     * @param source an Iterable.
      * @param condition a function that checks each item of the Iterable. The method returns the single item for which
      * condition returns true.
      */
-    single: typeof single;
-
+    single: (condition?: (item: T, index: number) => boolean) => T;
     /**
      * Enumerates Iterable and returns the single item that satisfies the condition. If the condition is not passed,
      * the method returns the first item of the Iterable. If there is no item that satisfies the condition or
      * the condition is not passed and the Iterable is empty, the method returns the `defaultValue`. But if there are
      * several items that satisfy the condition, the method throws an error.
-     * @param source an Iterable.
      * @param defaultValue a value that is returned if the Iterable doesn't have items that satisfy the condition.
      * @param condition a function that checks each item of the Iterable. The method returns the single item for which
      * condition returns true.
      */
-    singleOrDefault: typeof singleOrDefault;
+    singleOrDefault: (defaultValue: T, condition?: (item: T, index: number) => boolean) => T;
 
     /**
      * Enumerates Iterable and returns the last item that satisfies the condition. If the condition is not passed,
      * the method returns the last item of the Iterable. If there is no item that satisfies the condition
      * or the condition is not passed and the Iterable is empty, the method throws an error.
-     * @param source an Iterable.
      * @param condition a function that checks each item of the Iterable. The method returns the last item for which
      * condition returns true.
      */
-    last: typeof last;
+    last: (condition?: (item: T, index: number) => boolean) => T;
 
     /**
      * Enumerates Iterable and returns the last item that satisfies the condition. If the condition is not passed,
      * the method returns the last item of the Iterable. If there is no item that satisfies the condition
      * or the condition is not passed and the Iterable is empty, the method returns the `defaultValue`.
-     * @param source an Iterable.
      * @param defaultValue a value that is returned if the Iterable doesn't have items that satisfy the condition.
      * @param condition a function that checks each item of the Iterable. The method returns the last item for which
      * condition returns true.
      */
-    lastOrDefault: typeof lastOrDefault;
+    lastOrDefault: (defaultValue: T, condition?: (item: T, index: number) => boolean) => T;
 
     /**
      * Enumerates iterator and returns the number of items that satisfy the condition. If the condition is not passed,
      * returns the number of items in the Iterable.
-     * @param source an Iterable.
      * @param condition a function-condition uses an item. The counter is incremented if the function returns true.
      */
-    count: typeof count;
+    count: (condition?: (item: T, index: number) => boolean) => number;
 
     /**
      * Enumerates Iterable and returns true if the Iterable contains the passed element. The method uses `===`
      * for comparison by default, but if the comparer is passed, the method uses it.
-     * @param source an Iterable.
      * @param element the desired element.
      * @param comparer a function that compare the element and the item of the Iterable.
      * If it returns true - the values are equal.
      */
-    contains: typeof contains;
+    contains: (element: T, comparer?: (a: T, b: T) => boolean) => boolean;
 
     /**
      * Enumerates iterator and returns true if at least one item satisfies the condition. If the condition is not passed,
      * returns true if the Iterable has at least one item.
-     * @param source an Iterable.
      * @param condition a function that is used to check.
      */
-    some: typeof some;
+    some: (condition?: (item: T, index: number) => boolean) => boolean;
 
     /**
      * Enumerates iterator and returns true if all items satisfy the condition.
-     * @param source an Iterable.
      * @param condition a function that is used to check.
      */
-    every: typeof every;
+    every: (condition: (item: T, index: number) => boolean) => boolean;
 
     /**
      * Enumerate Iterable and returns the minimum item. Works only with a numeric Iterable.
-     * @param source an Iterable.
      */
-    min: typeof min;
+    min: T extends number ? () => number : never;
 
     /**
      * Enumerate Iterable and returns the maximum item. Works only with a numeric Iterable.
-     * @param source an Iterable.
      */
-    max: typeof max;
+    max: T extends number ? () => number : never;
 
     /**
      * Enumerate Iterable and returns the sum of the items. Works only with a numeric Iterable.
-     * @param source an Iterable.
      */
-    sum: typeof sum;
+    sum: T extends number ? () => number : never;
+    [chainMarker]: true;
 }
 
-export const chain: Chain = (function() {
-    const func: any = function(source: any) {
-        if (isIterable(source)) {
-            return create(source);
-        }
-        return fromGeneratorFunction(objectGenerator, source);
+interface NumberChainIterable {
+    min: () => number;
+    max: () => number;
+    sum: () => number;
+}
+
+interface FilterOverride<T> {
+    <S extends T>(condition: (item: T, index: number) => item is S): IterableChain<S>;
+
+    (condition: (item: T, index: number) => boolean): IterableChain<T>;
+}
+
+export function create<T>(source: Iterable<T>): IterableChain<T> {
+    const iter: Omit<IterableChain<T>, keyof NumberChainIterable> & NumberChainIterable & Iterable<T> = {
+        map: (mapper) => fromGeneratorFunction(mapGenerator, source, mapper,),
+        filter: (condition: any) => fromGeneratorFunction(filterGenerator, source, condition),
+        append: (element) => fromGeneratorFunction(appendGenerator, source, element),
+        prepend: (element) => fromGeneratorFunction(prependGenerator, source, element),
+        concat: (other) => fromGeneratorFunction(concatGenerator, source, other),
+        skip: (count) => fromGeneratorFunction(skipGenerator, source, count),
+        take: (count) => fromGeneratorFunction(takeGenerator, source, count),
+        reverse: () => fromGeneratorFunction(reverseGenerator, source),
+        distinct: (stringifier) => fromGeneratorFunction(distinctGenerator, source, stringifier),
+        except: (other, stringifier) => fromGeneratorFunction(exceptGenerator, source, other, stringifier),
+        intersect: (other, stringifier) => fromGeneratorFunction(intersectGenerator, source, other, stringifier),
+        union: (other, stringifier) => fromGeneratorFunction(unionGenerator, source, other, stringifier),
+        groupBy: (keySelector, valueSelector, keyStringifier) => create(
+            groupBy(
+                source,
+                keySelector,
+                valueSelector,
+                keyStringifier
+            )),
+        flatMap: (mapper) => fromGeneratorFunction(flatMapGenerator, source, mapper),
+        zip: (other, mapper) => fromGeneratorFunction(zipGenerator, source, other, mapper),
+        contains: (element, comparer) => contains(source, element, comparer),
+        count: (condition) => count(source, condition),
+        every: (condition) => every(source, condition),
+        some: (condition) => some(source, condition),
+        first: (condition) => first(source, condition),
+        firstOreDefault: (defaultValue, condition) => firstOrDefault(source, defaultValue, condition),
+        single: (condition) => single(source, condition),
+        singleOrDefault: (defaultValue, condition) => singleOrDefault(source, defaultValue, condition),
+        last: (condition) => last(source, condition),
+        lastOrDefault: (defaultValue, condition) => lastOrDefault(source, defaultValue, condition),
+        reduce: function(callback, initial) {
+            return arguments.length === 1
+                ? reduce(source, callback)
+                : reduce(source, callback, initial);
+        },
+        join: (other, keySelector, otherKeySelector, mapper) => fromGeneratorFunction(
+            joinGenerator,
+            source,
+            other,
+            keySelector,
+            otherKeySelector,
+            mapper
+        ),
+        sort: (comparer?: (a: T, b: T) => number) => create(sort(source, comparer)),
+        max: () => max(source as any),
+        min: () => min(source as any),
+        sum: () => sum(source as any),
+        [Symbol.iterator]: () => source[Symbol.iterator](),
+        [chainMarker]: true,
+        toArray: () => Array.isArray(source) ? source : Array.from(source),
+        toSet: () => source instanceof Set ? source : new Set(source),
+        toMap: (keySelector, valueSelector) => valueSelector == null && source instanceof Map
+            ? source
+            : toMap(source, keySelector, valueSelector),
+        toObject: (keySelector, valueSelector) => toObject(source, keySelector, valueSelector),
     };
 
-    func.range = function(start: number, count: number): IterableChain<number> {
-        return fromGeneratorFunction(rangeGenerator, start, count);
-    };
-    func.repeat = function <T>(value: T, count: number): IterableChain<T> {
-        return fromGeneratorFunction(repeatGenerator, value, count);
-    };
-    func.map = function <T, R>(source: Iterable<T>, mapper: (item: T, index: number) => R) {
-        return fromGeneratorFunction(mapGenerator, source, mapper);
-    };
-    func.filter = filter;
-    func.append = function <T>(source: Iterable<T>, element: T) {
-        return fromGeneratorFunction(appendGenerator, source, element);
-    };
-    func.prepend = function <T>(source: Iterable<T>, element: T) {
-        return fromGeneratorFunction(prependGenerator, source, element);
-    };
-    func.concat = function <T, S>(source: Iterable<T>, other: Iterable<S>) {
-        return fromGeneratorFunction(concatGenerator, source, other);
-    };
-    func.skip = function <T>(source: Iterable<T>, count: number): IterableChain<T> {
-        return fromGeneratorFunction(skipGenerator, source, count);
-    };
-    func.take = function <T>(source: Iterable<T>, count: number): IterableChain<T> {
-        return fromGeneratorFunction(takeGenerator, source, count);
-    };
-    func.reverse = function <T>(source: Iterable<T>): IterableChain<T> {
-        return fromGeneratorFunction(reverseGenerator, source);
-    };
-    func.distinct = function <T>(source: Iterable<T>, stringifier?: (item: T) => string): IterableChain<T> {
-        return fromGeneratorFunction(distinctGenerator, source, stringifier);
-    };
-    func.except =
-        function <T>(first: Iterable<T>, second: Iterable<T>, stringifier?: (item: T) => string): IterableChain<T> {
-            return fromGeneratorFunction(exceptGenerator, first, second, stringifier);
-        };
-    func.intersect =
-        function <T>(first: Iterable<T>, second: Iterable<T>, stringifier?: (item: T) => string): IterableChain<T> {
-            return fromGeneratorFunction(intersectGenerator, first, second, stringifier);
-        };
-    func.union =
-        function <T>(first: Iterable<T>, second: Iterable<T>, stringifier?: (item: T) => string): IterableChain<T> {
-            return fromGeneratorFunction(unionGenerator, first, second, stringifier);
-        };
-    func.groupBy =
-        function <T, TKey, TValue = T>(
-            source: Iterable<T>,
-            keySelector: (item: T) => TKey,
-            valueSelector?: (item: T) => TValue,
-            keyStringifier?: (key: TKey) => Keyable
-        ) {
-            return create(groupBy(source, keySelector, valueSelector, keyStringifier));
-        };
-    func.flatMap =
-        function <T, R>(source: Iterable<T>, mapper: (item: T, index: number) => Iterable<R>): IterableChain<R> {
-            return fromGeneratorFunction(flatMapGenerator, source, mapper);
-        };
-    func.zip =
-        function <T1, T2, R = [T1, T2]>(
-            source1: Iterable<T1>,
-            source2: Iterable<T2>,
-            mapper?: (item1: T1, item2: T2) => R
-        ): IterableChain<R> {
-            return fromGeneratorFunction(zipGenerator, source1, source2, mapper);
-        };
-    func.join =
-        function <T1, T2, TKey extends Keyable, R>(
-            source1: Iterable<T1>,
-            source2: Iterable<T2>,
-            source1KeyProvider: (item: T1) => TKey,
-            source2KeyProvider: (item: T2) => TKey,
-            mapper: (item1: T1, item2: T2) => R
-        ): IterableChain<R> {
-            return fromGeneratorFunction(
-                joinGenerator,
-                source1,
-                source2,
-                source1KeyProvider,
-                source2KeyProvider,
-                mapper
-            );
-        };
-    func.sort = function <T>(source: Iterable<T>, comparer?: (a: T, b: T) => number) {
-        return create(sort(source, comparer));
-    };
-    func.some = some;
-    func.every = every;
-    func.count = count;
-    func.contains = contains;
-    func.first = first;
-    func.firstOrDefault = firstOrDefault;
-    func.single = single;
-    func.singleOrDefault = singleOrDefault;
-    func.last = last;
-    func.lastOrDefault = lastOrDefault;
-    func.reduce = reduce;
-    func.min = min;
-    func.max = max;
-    func.sum = sum;
-    return func;
-})();
+    return iter as IterableChain<T>;
+}
 
-function filter<T, S extends T>(source: Iterable<T>, condition: (item: T, index: number) => item is S): IterableChain<S>
-function filter<T>(source: Iterable<T>, condition: (item: T, index: number) => boolean): IterableChain<T>
-function filter<T>(source: Iterable<T>, condition: (item: T, index: number) => boolean) {
-    return fromGeneratorFunction(filterGenerator, source, condition);
+export function fromGeneratorFunction<Args extends unknown[], R>(
+    generatorFunction: (...args: Args) => Generator<R>,
+    ...args: Args
+): IterableChain<R> {
+    return create({ [Symbol.iterator]: () => generatorFunction(...args) });
 }
